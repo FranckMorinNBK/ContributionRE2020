@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;background:#DFD6C9;min-height:100vh;padding:0;}
+
+/* HEADER */
+.header{background:#063E3E;padding:18px 32px;display:flex;align-items:center;gap:16px;}
+.logo-svg{height:36px;width:auto;}
+.header-title{color:#DFD6C9;font-size:15px;font-weight:300;letter-spacing:0.04em;border-left:1px solid #388F7F;padding-left:16px;margin-left:4px;}
+
+/* MAIN */
+.main{padding:24px 28px;}
+.tool-title{font-size:18px;color:#063E3E;font-weight:600;margin-bottom:4px;}
+.tool-sub{font-size:13px;color:#636363;margin-bottom:20px;}
+
+/* CARD */
+.card{background:#fff;border-radius:10px;border:1px solid #c8c0b4;padding:20px 22px;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:600;color:#388F7F;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title::after{content:'';flex:1;height:1px;background:#DFD6C9;}
+
+/* GRID INPUTS */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:11px;color:#636363;font-weight:500;}
+.field input{padding:7px 10px;font-size:13px;border:1px solid #c8c0b4;border-radius:6px;background:#faf8f5;color:#063E3E;font-family:'Segoe UI',sans-serif;transition:border-color .15s;}
+.field input:focus{outline:none;border-color:#388F7F;background:#fff;}
+.field input::placeholder{color:#B1B8B6;}
+
+/* DVE */
+.dve-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.dve-wrap label{font-size:13px;font-weight:600;color:#063E3E;}
+.dve-wrap input{width:80px;padding:7px 10px;font-size:14px;font-weight:600;border:1px solid #c8c0b4;border-radius:6px;background:#faf8f5;color:#063E3E;text-align:center;}
+.dve-wrap input:focus{outline:none;border-color:#388F7F;}
+.dve-wrap span{font-size:12px;color:#636363;}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.btn{padding:10px 24px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:'Segoe UI',sans-serif;transition:opacity .15s;}
+.btn-calc{background:#E15629;color:#fff;}
+.btn-calc:hover{opacity:.88;}
+.btn-reset{background:#fff;color:#063E3E;border:1px solid #c8c0b4;}
+.btn-reset:hover{background:#f5f2ee;}
+.err{font-size:12px;color:#E15629;display:none;}
+
+/* RESULTS */
+.results{display:none;}
+.results.visible{display:block;}
+
+/* KPI BAND */
+.kpi-band{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px;}
+.kpi{background:#fff;border-radius:10px;padding:16px 18px;border:1px solid #c8c0b4;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:#B1B8B6;}
+.kpi.kpi-main::before{background:#E15629;}
+.kpi.kpi-b::before{background:#388F7F;}
+.kpi.kpi-c::before{background:#063E3E;}
+.kpi-label{font-size:11px;color:#636363;font-weight:500;margin-bottom:6px;}
+.kpi-val{font-size:22px;font-weight:700;color:#063E3E;line-height:1;}
+.kpi-unit{font-size:10px;color:#636363;margin-top:3px;}
+
+/* DETAIL */
+.detail-row{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#636363;margin-bottom:18px;}
+.detail-row b{color:#063E3E;}
+
+/* CHART */
+.chart-wrap{background:#fff;border-radius:10px;border:1px solid #c8c0b4;padding:20px 22px;margin-bottom:14px;}
+.chart-title{font-size:11px;font-weight:600;color:#388F7F;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;}
+#chart-canvas{width:100%;height:260px;}
+
+/* DECOMP TABLE */
+.dec-table{width:100%;border-collapse:collapse;font-size:12px;}
+.dec-table th{text-align:left;color:#636363;font-weight:600;font-size:11px;padding:6px 8px;border-bottom:1px solid #DFD6C9;}
+.dec-table td{padding:6px 8px;border-bottom:1px solid #f0ece6;color:#063E3E;}
+.dec-table tr:last-child td{border-bottom:none;font-weight:700;background:#f5f2ee;}
+.tag-orange{display:inline-block;background:#fde8e0;color:#E15629;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <!-- Logo Nobatek SVG reconstruit depuis l'image -->
+  <svg class="logo-svg" viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg">
+    <!-- n orange -->
+    <text x="0" y="64" font-family="'Segoe UI',sans-serif" font-size="72" font-weight="700" fill="#E15629">n</text>
+    <!-- obatek vert foncé -->
+    <text x="42" y="64" font-family="'Segoe UI',sans-serif" font-size="72" font-weight="700" fill="#063E3E">obatek</text>
+  </svg>
+  <div class="header-title">Calculateur Ic_composant RE2020</div>
+</div>
+
+<div class="main">
+  <div class="tool-title">Impact carbone d'un composant de construction</div>
+  <div class="tool-sub">Arrêté du 4 août 2021 — Méthode dynamique RE2020 — Période d'étude de référence : 50 ans</div>
+
+  <!-- DVE -->
+  <div class="card">
+    <div class="card-title">Durée de vie estimée (DVE)</div>
+    <div class="dve-wrap">
+      <label>DVE :</label>
+      <input type="number" id="dve" value="25" min="1" max="50" step="1"/>
+      <span>ans &nbsp;|&nbsp; PER = 50 ans &nbsp;|&nbsp; Renouvellements α = <b id="alpha-preview">2</b></span>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div class="card">
+    <div class="card-title">Production &amp; Construction</div>
+    <div class="grid">
+      <div class="field"><label>A1-A3 – Fabrication</label><input type="number" id="A1A3" placeholder="0" step="any"/></div>
+      <div class="field"><label>A4 – Transport</label><input type="number" id="A4" placeholder="0" step="any"/></div>
+      <div class="field"><label>A5 – Mise en œuvre</label><input type="number" id="A5" placeholder="0" step="any"/></div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="card">
+    <div class="card-title">Phase d'utilisation — Module B (hors B6/B7)</div>
+    <div class="grid">
+      <div class="field"><label>B1 – Utilisation</label><input type="number" id="B1" placeholder="0" step="any"/></div>
+      <div class="field"><label>B2 – Maintenance</label><input type="number" id="B2" placeholder="0" step="any"/></div>
+      <div class="field"><label>B3 – Réparation</label><input type="number" id="B3" placeholder="0" step="any"/></div>
+      <div class="field"><label>B4 – Remplacement</label><input type="number" id="B4" placeholder="0" step="any"/></div>
+      <div class="field"><label>B5 – Réhabilitation</label><input type="number" id="B5" placeholder="0" step="any"/></div>
+    </div>
+  </div>
+
+  <!-- C + D -->
+  <div class="card">
+    <div class="card-title">Fin de vie &amp; Module D</div>
+    <div class="grid">
+      <div class="field"><label>C1 – Déconstruction</label><input type="number" id="C1" placeholder="0" step="any"/></div>
+      <div class="field"><label>C2 – Transport</label><input type="number" id="C2" placeholder="0" step="any"/></div>
+      <div class="field"><label>C3 – Traitement déchets</label><input type="number" id="C3" placeholder="0" step="any"/></div>
+      <div class="field"><label>C4 – Élimination</label><input type="number" id="C4" placeholder="0" step="any"/></div>
+      <div class="field"><label>D – Bénéfices hors système</label><input type="number" id="D" placeholder="optionnel" step="any"/></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-calc" onclick="calculate()">Calculer Ic_composant</button>
+    <button class="btn btn-reset" onclick="resetForm()">Réinitialiser</button>
+    <span class="err" id="err">DVE doit être > 0 et ≤ 50.</span>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results" style="margin-top:20px;">
+
+    <div class="kpi-band">
+      <div class="kpi kpi-main">
+        <div class="kpi-label">Ic_composant RE2020 <span class="tag-orange">réglementaire</span></div>
+        <div class="kpi-val" id="r_re2020">–</div>
+        <div class="kpi-unit">kg CO₂ eq.</div>
+      </div>
+      <div class="kpi kpi-b">
+        <div class="kpi-label">Total CdV hors module D</div>
+        <div class="kpi-val" id="r_horsD">–</div>
+        <div class="kpi-unit">kg CO₂ eq.</div>
+      </div>
+      <div class="kpi kpi-c">
+        <div class="kpi-label">Total CdV avec module D</div>
+        <div class="kpi-val" id="r_avecD">–</div>
+        <div class="kpi-unit">kg CO₂ eq.</div>
+      </div>
+    </div>
+
+    <div class="detail-row" id="r_info"></div>
+
+    <!-- CHART -->
+    <div class="chart-wrap">
+      <div class="chart-title">Contribution par phase du cycle de vie (kg CO₂ eq.)</div>
+      <canvas id="chart-canvas"></canvas>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+      <div class="card-title">Décomposition du calcul dynamique</div>
+      <table class="dec-table" id="r_detail"></table>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const COEF_DYN=[1,0.992,0.984,0.976,0.969,0.961,0.953,0.945,0.937,0.929,0.921,0.913,0.905,0.897,0.889,0.88,0.872,0.864,0.856,0.848,0.84,0.831,0.823,0.815,0.806,0.798,0.79,0.781,0.773,0.764,0.756,0.747,0.739,0.73,0.721,0.713,0.704,0.695,0.686,0.678,0.669,0.66,0.651,0.642,0.633,0.624,0.615,0.606,0.597,0.587,0.578];
+const PER=50;
+let chartInst=null;
+
+document.getElementById('dve').addEventListener('input',function(){
+  const d=parseInt(this.value)||0;
+  document.getElementById('alpha-preview').textContent=d>0?Math.trunc(PER/d):'–';
+});
+
+function v(id){const x=parseFloat(document.getElementById(id).value);return isNaN(x)?0:x;}
+function fmt(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function calculate(){
+  const DVE=parseInt(document.getElementById('dve').value);
+  const errEl=document.getElementById('err');
+  if(!DVE||DVE<=0||DVE>50){errEl.style.display='inline';document.getElementById('results').classList.remove('visible');return;}
+  errEl.style.display='none';
+
+  const A1A3=v('A1A3'),A4=v('A4'),A5=v('A5'),A4A5=A4+A5;
+  const B1=v('B1'),B2=v('B2'),B3=v('B3'),B4=v('B4'),B5=v('B5');
+  const C1=v('C1'),C2=v('C2'),C3=v('C3'),C4=v('C4');
+  const D_raw=parseFloat(document.getElementById('D').value);
+  const hasD=!isNaN(D_raw);
+  const D=hasD?D_raw:0;
+  const B_total=B1+B2+B3+B4+B5;
+  const C=C1+C2+C3+C4;
+
+  const alpha=Math.trunc(PER/DVE);
+  const Futil=PER/DVE-alpha;
+  const Production=A1A3+A4A5;
+
+  let beta1=0;
+  for(let i=1;i<=DVE&&i<COEF_DYN.length;i++) beta1+=B_total*COEF_DYN[i]/DVE;
+
+  const FinDeVie=C*COEF_DYN[PER];
+  let Fco2=0,beta2=0;
+  let moduleD=hasD?D*COEF_DYN[PER]:0;
+
+  if(alpha>0){
+    for(let i=1;i<alpha;i++){const idx=i*DVE;if(idx<COEF_DYN.length)Fco2+=COEF_DYN[idx];}
+    const idxA=alpha*DVE;
+    const cA=idxA<COEF_DYN.length?COEF_DYN[idxA]:COEF_DYN[COEF_DYN.length-1];
+    beta2=(A1A3+A4A5+C)*(Fco2+Futil*cA);
+    if(hasD)moduleD+=D*(Fco2+Futil*cA);
+  }
+
+  const Exploitation=beta1+beta2;
+  const totalRE2020=Production+Exploitation+FinDeVie+moduleD;
+  const totalHorsD=A1A3+A4A5+B_total+C;
+  const totalAvecD=totalHorsD+(hasD?D:0);
+
+  document.getElementById('r_re2020').textContent=fmt(totalRE2020);
+  document.getElementById('r_horsD').textContent=fmt(totalHorsD);
+  document.getElementById('r_avecD').textContent=fmt(totalAvecD);
+  document.getElementById('r_info').innerHTML=`<span>α (renouvellements) = <b>${alpha}</b></span>&nbsp;&nbsp;<span>Futil = <b>${Futil.toFixed(3)}</b></span>&nbsp;&nbsp;<span>c_dyn[50] = <b>${COEF_DYN[PER]}</b></span>`;
+
+  // CHART — histogramme par phase
+  const labels=['A1-A3\nFabrication','A4-A5\nTransport+Chantier','B1-B5\nExploitation','β2\nRenouvellements','C\nFin de vie','D\nBénéfices'];
+  const vals=[A1A3, A4A5, beta1, beta2, FinDeVie, hasD?moduleD:null];
+  const colors=['#063E3E','#388F7F','#5AA89A','#7DC4B8','#E15629', '#B1B8B6'];
+  const borderColors=colors;
+
+  const filteredLabels=[], filteredVals=[], filteredColors=[], filteredBorders=[];
+  vals.forEach((val,i)=>{
+    if(val!==null){filteredLabels.push(labels[i]);filteredVals.push(val);filteredColors.push(colors[i]);filteredBorders.push(borderColors[i]);}
+  });
+
+  if(chartInst)chartInst.destroy();
+  const ctx=document.getElementById('chart-canvas').getContext('2d');
+  chartInst=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:filteredLabels,
+      datasets:[{
+        label:'kg CO₂ eq.',
+        data:filteredVals,
+        backgroundColor:filteredColors,
+        borderColor:filteredBorders,
+        borderWidth:0,
+        borderRadius:5,
+        borderSkipped:false,
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:ctx=>`${fmt(ctx.parsed.y)} kg CO₂ eq.`
+          },
+          backgroundColor:'#063E3E',
+          titleColor:'#DFD6C9',
+          bodyColor:'#fff',
+          padding:10,
+          cornerRadius:6,
+        }
+      },
+      scales:{
+        x:{
+          grid:{display:false},
+          ticks:{font:{family:"'Segoe UI',sans-serif",size:11},color:'#636363',maxRotation:0}
+        },
+        y:{
+          grid:{color:'#e8e4de'},
+          border:{dash:[4,4],display:false},
+          ticks:{font:{family:"'Segoe UI',sans-serif",size:11},color:'#636363',
+            callback:v=>`${fmt(v)}`}
+        }
+      }
+    }
+  });
+
+  document.getElementById('r_detail').innerHTML=`
+    <thead><tr>
+      <th>Composante</th><th>Description</th><th style="text-align:right">Valeur (kg CO₂ eq.)</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>Production</td><td>A1-A3 + A4 + A5</td><td style="text-align:right">${fmt(Production)}</td></tr>
+      <tr><td>β1 – Exploitation</td><td>Σ B1-B5 × c_dyn[i] / DVE</td><td style="text-align:right">${fmt(beta1)}</td></tr>
+      <tr><td>β2 – Renouvellements</td><td>(A1-A3+A4A5+C) × (Fco2 + Futil × c_dyn[α×DVE])</td><td style="text-align:right">${fmt(beta2)}</td></tr>
+      <tr><td>Fin de vie C</td><td>C × c_dyn[50] = C × ${COEF_DYN[PER]}</td><td style="text-align:right">${fmt(FinDeVie)}</td></tr>
+      <tr><td>Module D</td><td>D pondéré dynamiquement${hasD?'':' (absent)'}</td><td style="text-align:right">${hasD?fmt(moduleD):'–'}</td></tr>
+      <tr><td colspan="2"><b>Ic_composant RE2020</b></td><td style="text-align:right"><b>${fmt(totalRE2020)}</b></td></tr>
+    </tbody>`;
+
+  document.getElementById('results').classList.add('visible');
+}
+
+function resetForm(){
+  ['A1A3','A4','A5','B1','B2','B3','B4','B5','C1','C2','C3','C4','D'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('dve').value=25;
+  document.getElementById('alpha-preview').textContent=2;
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('err').style.display='none';
+  if(chartInst){chartInst.destroy();chartInst=null;}
+}
+</script>
+</body>
+</html>
