@@ -51,7 +51,8 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .kpi.kpi-b::before{background:#388F7F;}
 .kpi.kpi-c::before{background:#1C4838;}
 .kpi-label{font-size:12px;color:#636363;font-weight:500;margin-bottom:4px;display:flex;align-items:center;gap:5px;}
-.tag-re{font-size:11px;background:#fde8e0;color:#D1562A;padding:1px 5px;border-radius:8px;font-weight:700;}
+.tag-re{font-size:11px;background:#fde8e0;color:#D1562A;padding:1px 5px;border-radius:5px;font-weight:700;}
+.tag-fdes{font-size:11px;background:#d2f3e8;color:#388F7F;padding:1px 5px;border-radius:5px;font-weight:700;}
 .kpi-val{font-size:22px;font-weight:700;color:#1C4838;line-height:1;}
 .kpi-unit{font-size:11px;color:#B1B8B6;margin-top:2px;}
 
@@ -149,12 +150,12 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
         <div class="kpi-unit">kg CO₂ eq.</div>
       </div>
       <div class="kpi kpi-b">
-        <div class="kpi-label">Total CdV hors module D</div>
+        <div class="kpi-label">Total CdV hors module D<span class="tag-fdes">FDES</span></div>
         <div class="kpi-val" id="r_horsD">–</div>
         <div class="kpi-unit">kg CO₂ eq.</div>
       </div>
       <div class="kpi kpi-c">
-        <div class="kpi-label">Total CdV avec module D</div>
+        <div class="kpi-label">Total CdV avec module D<span class="tag-fdes">FDES</span></div>
         <div class="kpi-val" id="r_avecD">–</div>
         <div class="kpi-unit">kg CO₂ eq.</div>
       </div>
