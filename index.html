@@ -88,7 +88,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <div class="dve-block">
         <div class="group-label">DVR</div>
         <div class="dve-inner">
-          <input type="number" id="dve" value="50" min="1" max="50" step="1"/>
+          <input type="number" id="dve" value="50" min="1" max="100" step="1"/>
           <span style="font-size:11px;color:#636363;">ans</span>
         </div>
         <div class="alpha-info">PER=50 ans</div>
@@ -137,7 +137,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
     </div>
 
-    <span class="err" id="err">DVE doit être compris entre 1 et 50 ans.</span>
+    <span class="err" id="err">DVR doit être compris entre 1 et 100 ans.</span>
   </div>
 
   <!-- RESULTS -->
@@ -195,7 +195,7 @@ function fmt(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximum
 function calculate(){
   const DVE=parseInt(document.getElementById('dve').value);
   const errEl=document.getElementById('err');
-  if(!DVE||DVE<=0||DVE>50){errEl.style.display='inline';document.getElementById('results').classList.remove('visible');return;}
+  if(!DVE||DVE<=0||DVE>100){errEl.style.display='inline';document.getElementById('results').classList.remove('visible');return;}
   errEl.style.display='none';
 
   const A1A3=v('A1A3'),A4=v('A4'),A5=v('A5'),A4A5=A4+A5;
