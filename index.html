@@ -74,7 +74,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 <body>
 
 <div class="header">
-  <img src="NOBATEK_logo_officiel_web_PNG.png" style="height:48px;width:auto;" alt="Nobatek logo"/>
+  <a href="https://www.nobatek.com/" target="_blank" rel="noopener"><img src="NOBATEK_logo_officiel_web_PNG.png" style="height:48px;width:auto;" alt="Nobatek logo"/></a>
   <div class="header-title">Calculateur Ic_composant RE2020</div>
 </div>
 
@@ -86,11 +86,11 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <!-- DVE -->
       <div class="dve-block">
         <div class="group-label">DVR</div>
-        <div class="dve-inner">
+        <div class="field"><label>PER = 50 ans</label><input type="number" id="dve" value="50" min="1" max="100" step="1"/></div>
+        <!-- <div class="dve-inner">
           <input type="number" id="dve" value="50" min="1" max="100" step="1"/>
           <span style="font-size:10px;color:#636363;">ans</span>
-        </div>
-        <div class="alpha-info">PER=50 ans</div>
+        </div> -->
       </div>
 
       <!-- A -->
@@ -130,7 +130,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <div class="group">
         <div class="group-label">Module D</div>
         <div class="fields-row">
-          <div class="field wide"><label>D Bénéfices hors système</label><input type="number" id="D" placeholder="optionnel" step="any"/></div>
+          <div class="field wide"><label>D Bénéfices hors système</label><input type="number" id="D" placeholder="0" step="any"/></div>
         </div>
       </div>
 
