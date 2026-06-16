@@ -11,11 +11,13 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .header{background:#1C4838;padding:10px 24px;display:flex;align-items:center;gap:14px;border-bottom:3px solid #D1562A;}
 .header img{background:#fff;padding:4px 8px;border-radius:4px;}
 .header-title{color:#fff;font-size:20px;font-weight:400;letter-spacing:0.03em;}
+.header-subtitle{color:rgba(255,255,255,0.65);font-size:14px;font-weight:400;margin-top:2px;}
 
 .main{padding:14px 24px;display:flex;flex-direction:column;gap:12px;}
 
 /* INPUT ZONE — une ligne */
 .input-zone{background:#fff;border-radius:8px;border:1px solid #c8c0b4;padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
+.zone-instruction{margin:0;color:#555;font-size:13px;}
 
 .row-inputs{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;}
 
@@ -77,12 +79,16 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
 <div class="header">
   <a href="https://www.nobatek.com/" target="_blank" rel="noopener"><img src="NOBATEK_logo_officiel_web_PNG.png" style="height:48px;width:auto;" alt="Nobatek logo"/></a>
-  <div class="header-title">Calculateur Ic_composant RE2020</div>
+  <div>
+    <div class="header-title">Calculateur Ic_composant RE2020</div>
+    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une FDES ou d'un PEP</div>
+  </div>
 </div>
 
 <div class="main">
 
   <div class="input-zone">
+    <p class="zone-instruction">Saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
     <div class="row-inputs">
 
       <!-- DVE -->
