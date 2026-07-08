@@ -81,7 +81,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
   <a href="https://www.nobatek.com/" target="_blank" rel="noopener"><img src="NOBATEK_logo_officiel_web_PNG.png" style="height:48px;width:auto;" alt="Nobatek logo"/></a>
   <div>
     <div class="header-title">Calculateur Ic_composant RE2020</div>
-    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une FDES ou d'un PEP</div>
+    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une FDES</div>
   </div>
 </div>
 
@@ -89,10 +89,11 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
   <div class="input-zone">
     <p class="zone-instruction">Saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
+    <p class="zone-instruction">Vous pouvez aussi coller directement dans le champ « A1-A3 » toute la ligne des impacts copiée depuis la fiche INIES.</p>
     <div class="row-inputs">
 
       <!-- DVE -->
-      <div class="dve-block">
+      <div class="dve-block" style="margin-top:12px;">
         <div class="group-label">DVR</div>
         <div class="field"><label>PER = 50 ans</label><input type="number" id="dve" placeholder="0" min="1" max="100" step="1"/></div>
         <!-- <div class="dve-inner">
@@ -106,8 +107,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
         <div class="group-label">Production &amp; Construction</div>
         <div class="fields-row">
           <div class="field"><label>A1-A3 Fabrication</label><input type="number" id="A1A3" placeholder="0" step="any"/></div>
-          <div class="field"><label>A4 Transport</label><input type="number" id="A4" placeholder="0" step="any"/></div>
-          <div class="field"><label>A5 Mise en œuvre</label><input type="number" id="A5" placeholder="0" step="any"/></div>
+          <div class="field"><label>A4-A5 Transport &amp; Mise en œuvre</label><input type="number" id="A4A5" placeholder="0" step="any"/></div>
         </div>
       </div>
 
@@ -127,10 +127,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <div class="group">
         <div class="group-label">Fin de vie C</div>
         <div class="fields-row">
-          <div class="field"><label>C1 Déconstruction</label><input type="number" id="C1" placeholder="0" step="any"/></div>
-          <div class="field"><label>C2 Transport</label><input type="number" id="C2" placeholder="0" step="any"/></div>
-          <div class="field"><label>C3 Traitement</label><input type="number" id="C3" placeholder="0" step="any"/></div>
-          <div class="field"><label>C4 Élimination</label><input type="number" id="C4" placeholder="0" step="any"/></div>
+          <div class="field"><label>C Fin de vie (C1-C4)</label><input type="number" id="C" placeholder="0" step="any"/></div>
         </div>
       </div>
 
@@ -189,11 +186,31 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 const COEF_DYN=[1,0.992,0.984,0.976,0.969,0.961,0.953,0.945,0.937,0.929,0.921,0.913,0.905,0.897,0.889,0.88,0.872,0.864,0.856,0.848,0.84,0.831,0.823,0.815,0.806,0.798,0.79,0.781,0.773,0.764,0.756,0.747,0.739,0.73,0.721,0.713,0.704,0.695,0.686,0.678,0.669,0.66,0.651,0.642,0.633,0.624,0.615,0.606,0.597,0.587,0.578];
 const PER=50;let chartInst=null;
 
-const allInputIds=['dve','A1A3','A4','A5','B1','B2','B3','B4','B5','C1','C2','C3','C4','D'];
+const allInputIds=['dve','A1A3','A4A5','B1','B2','B3','B4','B5','C','D'];
 allInputIds.forEach(id=>document.getElementById(id).addEventListener('input',calculate));
 document.getElementById('dve').addEventListener('input',function(){
   const d=parseInt(this.value)||0;
   document.getElementById('alpha-preview').textContent=d>0?Math.trunc(PER/d):'–';
+});
+
+// Collage groupé depuis la fiche INIES : colonnes du tableau "Résultats de l'ICV"
+// dans l'ordre Production / Construction / B1 / B2 / B3 / B4 / B5 / B6 / B7 / Usage(total) / Fin de vie / Total CdV / D
+// Seules les colonnes utiles au calcul RE2020 (production, B1-B5, fin de vie, D) sont retenues ; les totaux/B6/B7 sont ignorés.
+const INIES_PASTE_MAP=[
+  {id:'A1A3'},{id:'A4A5'},{id:'B1'},{id:'B2'},{id:'B3'},{id:'B4'},{id:'B5'},
+  {id:null},{id:null},{id:null},{id:'C'},{id:null},{id:'D'}
+];
+document.getElementById('A1A3').addEventListener('paste',function(e){
+  const text=(e.clipboardData||window.clipboardData).getData('text');
+  const tokens=text.split(/\t|\r?\n/).map(t=>t.trim()).filter(t=>t.length);
+  const values=tokens.map(t=>parseFloat(t.replace(',','.'))).filter(n=>!isNaN(n));
+  if(values.length!==INIES_PASTE_MAP.length)return; // pas le format attendu, on laisse le collage normal se faire
+  e.preventDefault();
+  values.forEach((val,i)=>{
+    const target=INIES_PASTE_MAP[i].id;
+    if(target)document.getElementById(target).value=val;
+  });
+  calculate();
 });
 
 function v(id){const x=parseFloat(document.getElementById(id).value);return isNaN(x)?0:x;}
@@ -205,12 +222,12 @@ function calculate(){
   if(!DVE||DVE<=0||DVE>100){errEl.style.display='inline';document.getElementById('results').classList.remove('visible');return;}
   errEl.style.display='none';
 
-  const A1A3=v('A1A3'),A4=v('A4'),A5=v('A5'),A4A5=A4+A5;
+  const A1A3=v('A1A3'),A4A5=v('A4A5');
   const B1=v('B1'),B2=v('B2'),B3=v('B3'),B4=v('B4'),B5=v('B5');
-  const C1=v('C1'),C2=v('C2'),C3=v('C3'),C4=v('C4');
+  const C=v('C');
   const D_raw=parseFloat(document.getElementById('D').value);
   const hasD=!isNaN(D_raw);const D=hasD?D_raw:0;
-  const B_total=B1+B2+B3+B4+B5,C=C1+C2+C3+C4;
+  const B_total=B1+B2+B3+B4+B5;
   const alpha=Math.trunc(PER/DVE),Futil=PER/DVE-alpha;
   const Production=A1A3+A4A5;
   let beta1=0;
