@@ -32,7 +32,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
 .field-dvr label{color:#D1562A;font-weight:700;}
 
-.err{font-size:13px;color:#D1562A;display:none;padding:4px 0;}
 
 .inies-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #EDECE7;}
 .inies-row label{font-size:11px;font-weight:700;color:#388F7F;text-transform:uppercase;letter-spacing:0.08em;}
@@ -77,6 +76,9 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .fdes-table tr:not(.active):hover td{background:#f5f2ee;}
 .fdes-table td.num{text-align:right;white-space:nowrap;}
 .fdes-table td.missing{color:#D1562A;}
+.qty-input{width:80px;padding:3px 5px;font-size:13px;border:1px solid #c8c0b4;border-radius:5px;background:#faf8f5;color:#1C4838;text-align:right;}
+.qty-input:focus{outline:none;border-color:#388F7F;background:#fff;}
+.qty-unit{display:inline-block;min-width:44px;text-align:left;margin-left:4px;color:#636363;font-weight:400;}
 .fdes-swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle;}
 .fdes-del{border:none;background:none;color:#B1B8B6;font-size:16px;cursor:pointer;line-height:1;padding:0 4px;}
 .fdes-del:hover{color:#D1562A;}
@@ -106,9 +108,9 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
   <div class="input-zone">
     <div class="group-label">FDES du calcul</div>
-    <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Cliquez sur une ligne du tableau pour modifier la FDES correspondante.</p>
+    <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Indiquez dans la colonne « Quantité » le nombre d'unités fonctionnelles (UF) à appliquer à chaque FDES. Cliquez sur une ligne du tableau pour modifier la FDES correspondante.</p>
     <table class="fdes-table">
-      <thead><tr><th>EPD_id</th><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Total CdV hors D (kg CO₂ eq.)</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
+      <thead><tr><th>EPD_id</th><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Quantité</th><th style="text-align:right">Total CdV hors D (kg CO₂ eq.)</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
       <tbody id="fdes_rows"></tbody>
     </table>
     <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
@@ -136,7 +138,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <div class="field"><label title="Module D – bénéfices et charges hors système (facultatif)">D</label><input type="number" id="D" placeholder="0" step="any" title="Module D – bénéfices et charges hors système (facultatif)"/></div>
     </div>
 
-    <span class="err" id="err">DVR doit être compris entre 1 et 100 ans (FDES non prise en compte dans le total).</span>
   </div>
 
   <!-- RESULTS -->
@@ -188,10 +189,11 @@ function fmt(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximum
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 // Liste des FDES du calcul. Les valeurs sont gardées telles que saisies (chaînes) pour pouvoir les réafficher.
-// info = données de la fiche INIES chargée : {id, nom, declarant, norme, dvr}, ou null pour une saisie manuelle.
+// info = données de la fiche INIES chargée : {id, nom, declarant, norme, dvr, unite}, ou null pour une saisie manuelle.
+// qty = nombre d'unités fonctionnelles (UF) appliqué à toutes les valeurs de la FDES.
 const VALUE_IDS=['dve','A1A3','A4A5','B1','B2','B3','B4','B5','C','D'];
 const fdesList=[];let active=0;
-function newFdes(){const f={name:'',info:null};VALUE_IDS.forEach(k=>f[k]='');return f;}
+function newFdes(){const f={name:'',info:null,qty:'1'};VALUE_IDS.forEach(k=>f[k]='');return f;}
 const fdesLabel=(f,i)=>f.name||`FDES ${i+1}`;
 
 function writeForm(){
@@ -220,9 +222,14 @@ function removeFdes(i){
 }
 $('fdes_add').addEventListener('click',addFdes);
 $('fdes_rows').addEventListener('click',e=>{
-  const tr=e.target.closest('tr');if(!tr)return;
+  const tr=e.target.closest('tr');if(!tr||e.target.closest('.qty-input'))return;
   const i=+tr.dataset.i;
   if(e.target.closest('.fdes-del'))removeFdes(i);else if(i!==active)selectFdes(i);
+});
+$('fdes_rows').addEventListener('input',e=>{
+  if(!e.target.classList.contains('qty-input'))return;
+  fdesList[+e.target.closest('tr').dataset.i].qty=e.target.value;
+  calculate();
 });
 
 // Collage groupé depuis la fiche INIES : colonnes du tableau "Résultats de l'ICV"
@@ -270,7 +277,7 @@ async function loadEpd(){
     ['A1A3','A4A5','B1','B2','B3','B4','B5','C'].forEach(k=>target[k]=String(data[k]));
     target.D=data.D==null?'':String(data.D);
     target.name=data.nom;
-    target.info={id:data.id,nom:data.nom,declarant:data.declarant,norme:data.norme,dvr:data.dvr};
+    target.info={id:data.id,nom:data.nom,declarant:data.declarant,norme:data.norme,dvr:data.dvr,unite:data.unite};
     if(fdesList[active]===target)writeForm();
     calculate();
   }catch(err){
@@ -305,11 +312,25 @@ function computeFdes(f){
     if(hasD)moduleD+=D*(Fco2+Futil*cA);
   }
   const totalHorsD=A1A3+A4A5+B_total+C;
-  return{A1A3,A4A5,beta1,beta2,FinDeVie,moduleD,hasD,
+  const r={A1A3,A4A5,beta1,beta2,FinDeVie,moduleD,
     totalRE2020:Production+beta1+beta2+FinDeVie+moduleD,totalHorsD,totalAvecD:totalHorsD+(hasD?D:0)};
+  // Valeurs FDES par UF : on applique la quantité saisie (vide ou invalide = 0)
+  const q=parseFloat(String(f.qty).replace(',','.'));
+  for(const k in r)r[k]*=isNaN(q)?0:q;
+  r.hasD=hasD;
+  return r;
 }
 
 function renderList(results){
+  // Saisie de quantité en cours : on met à jour les totaux sans reconstruire le tableau (garde le focus)
+  const rows=$('fdes_rows').rows;
+  if(document.activeElement?.classList.contains('qty-input')&&rows.length===fdesList.length){
+    results.forEach((r,i)=>{
+      rows[i].querySelector('[data-c=horsD]').textContent=r?fmt(r.totalHorsD):'–';
+      rows[i].querySelector('[data-c=ic]').textContent=r?fmt(r.totalRE2020):'–';
+    });
+    return;
+  }
   $('fdes_rows').innerHTML=fdesList.map((f,i)=>{
     const r=results[i];
     return `<tr data-i="${i}" class="${i===active?'active':''}">
@@ -317,8 +338,9 @@ function renderList(results){
       <td><span class="fdes-swatch" style="background:${color(i)}"></span>${esc(fdesLabel(f,i))}</td>
       <td>${esc(f.info?.declarant||'–')}</td>
       <td class="num${r?'':' missing'}">${r?parseInt(f.dve)+' ans':'à saisir'}</td>
-      <td class="num">${r?fmt(r.totalHorsD):'–'}</td>
-      <td class="num">${r?fmt(r.totalRE2020):'–'}</td>
+      <td class="num"><input type="number" class="qty-input" min="0" step="any" value="${esc(f.qty)}"/><span class="qty-unit">${esc(f.info?.unite||'UF')}</span></td>
+      <td class="num" data-c="horsD">${r?fmt(r.totalHorsD):'–'}</td>
+      <td class="num" data-c="ic">${r?fmt(r.totalRE2020):'–'}</td>
       <td class="num"><button type="button" class="fdes-del" title="Supprimer cette FDES">×</button></td>
     </tr>`;
   }).join('');
@@ -327,7 +349,6 @@ function renderList(results){
 function calculate(){
   const results=fdesList.map(computeFdes);
   renderList(results);
-  $('err').style.display=results[active]?'none':'inline';
 
   const valid=results.map((r,i)=>({r,i,f:fdesList[i]})).filter(x=>x.r);
   if(!valid.length){$('results').classList.remove('visible');return;}

@@ -1,6 +1,6 @@
 <?php
 // Relais vers l'API publique INIES (contourne le blocage CORS du navigateur).
-// Usage : inies.php?id=46443  →  JSON {id, nom, declarant, norme, dvr, A1A3, A4A5, B1..B5, C, D}
+// Usage : inies.php?id=46443  →  JSON {id, nom, declarant, norme, dvr, unite, A1A3, A4A5, B1..B5, C, D}
 // Valeurs = indicateur "Changement climatique - total" (EN 15804+A2) ou "Réchauffement climatique" (EN 15804+A1).
 
 header('Content-Type: application/json; charset=utf-8');
@@ -89,6 +89,17 @@ foreach ($produit['tIndicateurQuantites'] as $q) {
 }
 if (!$val) fail(422, "Aucune valeur de changement climatique dans cette fiche.");
 
+// Unité de l'UF (ex. « m² », ou « 10 m² » si l'UF ne porte pas sur une seule unité)
+function get_unite_uf($produit) {
+    foreach (fetch_cached('Unite', 'unites') as $u) {
+        if ($u['idUnite'] == $produit['idUnitUf']) {
+            $q = $produit['quantiteUf'];
+            return ($q === null || $q == 1) ? $u['nomUnite'] : "$q {$u['nomUnite']}";
+        }
+    }
+    return null;
+}
+
 // Total d'étape s'il existe, sinon somme des sous-modules
 function stage($val, $total, $parts) {
     if (isset($val[$total])) return $val[$total];
@@ -104,6 +115,7 @@ echo json_encode([
     'declarant' => get_declarant($produit['idAdmin']),
     'norme'     => $norme['nomNorme'],
     'dvr'   => $produit['dvt'],
+    'unite' => get_unite_uf($produit),
     'A1A3'  => stage($val, 11, [8, 9, 10]),
     'A4A5'  => ($val[12] ?? 0) + ($val[13] ?? 0),
     'B1'    => $val[14] ?? 0,
