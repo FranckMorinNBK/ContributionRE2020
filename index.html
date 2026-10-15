@@ -107,15 +107,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 <div class="main">
 
   <div class="input-zone">
-    <div class="group-label">FDES du calcul</div>
-    <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Indiquez dans la colonne « Quantité » le nombre d'unités fonctionnelles (UF) à appliquer à chaque FDES. Cliquez sur une ligne du tableau pour modifier la FDES correspondante.</p>
-    <table class="fdes-table">
-      <thead><tr><th>EPD_id</th><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Quantité</th><th style="text-align:right">Total CdV hors D (kg CO₂ eq.)</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
-      <tbody id="fdes_rows"></tbody>
-    </table>
-    <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
-
-    <div class="group-label" style="margin-top:6px;">FDES sélectionnée</div>
+    <div class="group-label">FDES sélectionnée</div>
     <div class="inies-row">
       <label for="epd_id">EPD_id INIES</label>
       <input type="text" id="epd_id" inputmode="numeric" placeholder="ex. 46443"/>
@@ -137,7 +129,16 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <div class="field"><label title="Fin de vie (C1-C4)">C1-C4</label><input type="number" id="C" placeholder="0" step="any" title="Fin de vie (C1-C4)"/></div>
       <div class="field"><label title="Module D – bénéfices et charges hors système (facultatif)">D</label><input type="number" id="D" placeholder="0" step="any" title="Module D – bénéfices et charges hors système (facultatif)"/></div>
     </div>
+  </div>
 
+  <div class="input-zone">
+    <div class="group-label">FDES du calcul</div>
+    <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Indiquez dans la colonne « Quantité » le nombre d'unités fonctionnelles (UF) à appliquer à chaque FDES. Cliquez sur une ligne du tableau pour modifier la FDES correspondante dans la zone « FDES sélectionnée » ci-dessus.</p>
+    <table class="fdes-table">
+      <thead><tr><th>EPD_id</th><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Quantité</th><th style="text-align:right">Total CdV hors D (kg CO₂ eq.)</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
+      <tbody id="fdes_rows"></tbody>
+    </table>
+    <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
   </div>
 
   <!-- RESULTS -->
