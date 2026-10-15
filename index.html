@@ -40,9 +40,14 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .inies-row button{padding:5px 12px;font-size:13px;border:none;border-radius:5px;background:#388F7F;color:#fff;cursor:pointer;}
 .inies-row button:hover{background:#1C4838;}
 .inies-row button:disabled{background:#B1B8B6;cursor:wait;}
-.inies-status{font-size:13px;color:#636363;}
+.inies-status{font-size:13px;color:#636363;flex-basis:100%;}
+.inies-status:empty{display:none;}
 .inies-status.error{color:#D1562A;}
 .inies-status a{color:#388F7F;}
+.edit-mode{text-transform:none;letter-spacing:0;font-weight:400;color:#636363;}
+.xml-drop{flex:1;min-width:240px;border:2px dashed #c8c0b4;border-radius:6px;padding:4px 10px;text-align:center;font-size:13px;color:#636363;background:#faf8f5;cursor:pointer;}
+.xml-drop:hover,.xml-drop:focus{outline:none;border-color:#388F7F;color:#1C4838;}
+.xml-drop.over{border-color:#388F7F;background:#e6f3ef;color:#1C4838;}
 
 /* RESULTS */
 .results{display:none;}
@@ -100,24 +105,26 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
   <a href="https://www.nobatek.com/" target="_blank" rel="noopener"><img src="NOBATEK_logo_officiel_web_PNG.png" style="height:48px;width:auto;" alt="Nobatek logo"/></a>
   <div>
     <div class="header-title">Calculateur Ic_composant RE2020</div>
-    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une ou plusieurs FDES</div>
+    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une ou plusieurs DEP (FDES ou PEP)</div>
   </div>
 </div>
 
 <div class="main">
 
   <div class="input-zone">
-    <div class="group-label">FDES sélectionnée</div>
+    <div class="group-label">DEP sélectionnée <span class="edit-mode" id="edit_mode"></span></div>
     <div class="inies-row">
       <label for="epd_id">EPD_id INIES</label>
       <input type="text" id="epd_id" inputmode="numeric" placeholder="ex. 46443"/>
       <button type="button" id="epd_load">Charger la fiche</button>
+      <div class="xml-drop" id="xml_drop" role="button" tabindex="0" title="Un ou plusieurs XML de configurateur (FDES ou PEP)">ou glissez ici un XML de configurateur (ou cliquez)</div>
+      <input type="file" id="xml_file" accept=".xml,text/xml,application/xml" multiple hidden/>
       <span class="inies-status" id="epd_status"></span>
     </div>
-    <p class="zone-instruction">Saisissez l'EPD_id d'une FDES INIES pour remplir automatiquement les champs, ou saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
+    <p class="zone-instruction">Saisissez l'EPD_id d'une DEP INIES (FDES ou PEP) ou déposez le XML d'un configurateur pour remplir automatiquement les champs, ou saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
     <p class="zone-instruction">Vous pouvez aussi coller directement dans le champ « A1-A3 » toute la ligne des impacts copiée depuis la fiche INIES.</p>
     <div class="row-inputs">
-      <div class="field"><label>Nom de la FDES</label><input type="text" id="fdes_name" placeholder="ex. Isolant laine de bois"/></div>
+      <div class="field"><label>Nom de la DEP</label><input type="text" id="fdes_name" placeholder="ex. Isolant laine de bois"/></div>
       <div class="field field-dvr"><label title="Durée de vie de référence (PER = 50 ans)">DVR (ans)</label><input type="number" id="dve" placeholder="0" min="1" max="100" step="1" title="Durée de vie de référence (PER = 50 ans)"/></div>
       <div class="field"><label title="Production (A1-A3)">A1-A3</label><input type="number" id="A1A3" placeholder="0" step="any" title="Production (A1-A3)"/></div>
       <div class="field"><label title="Transport et mise en œuvre (A4-A5)">A4-A5</label><input type="number" id="A4A5" placeholder="0" step="any" title="Transport et mise en œuvre (A4-A5)"/></div>
@@ -132,13 +139,13 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
   </div>
 
   <div class="input-zone">
-    <div class="group-label">FDES du calcul</div>
-    <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Indiquez dans la colonne « Quantité » le nombre d'unités fonctionnelles (UF) à appliquer à chaque FDES. Cliquez sur une ligne du tableau pour modifier la FDES correspondante dans la zone « FDES sélectionnée » ci-dessus.</p>
+    <div class="group-label">DEP du calcul</div>
+    <p class="zone-instruction">Ajoutez autant de DEP que nécessaire : l'Ic_composant total est la somme de leurs contributions. Indiquez dans la colonne « Quantité » le nombre d'unités fonctionnelles (UF) à appliquer à chaque DEP. Cliquez sur une ligne du tableau pour modifier la DEP correspondante dans la zone « DEP sélectionnée » ci-dessus.</p>
     <table class="fdes-table">
       <thead><tr><th>EPD_id</th><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Quantité</th><th style="text-align:right">Total CdV hors D (kg CO₂ eq.)</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
       <tbody id="fdes_rows"></tbody>
     </table>
-    <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
+    <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une DEP</button>
   </div>
 
   <!-- RESULTS -->
@@ -151,12 +158,12 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
         <div class="kpi-unit">kg CO₂ eq.</div>
       </div>
       <div class="kpi kpi-b">
-        <div class="kpi-label">Total CdV hors module D<span class="tag-fdes">FDES</span></div>
+        <div class="kpi-label">Total CdV hors module D<span class="tag-fdes">DEP</span></div>
         <div class="kpi-val" id="r_horsD">–</div>
         <div class="kpi-unit">kg CO₂ eq.</div>
       </div>
       <div class="kpi kpi-c">
-        <div class="kpi-label">Total CdV avec module D<span class="tag-fdes">FDES</span></div>
+        <div class="kpi-label">Total CdV avec module D<span class="tag-fdes">DEP</span></div>
         <div class="kpi-val" id="r_avecD">–</div>
         <div class="kpi-unit">kg CO₂ eq.</div>
       </div>
@@ -164,11 +171,11 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
     <div class="bottom-row">
       <div class="chart-card">
-        <div class="card-title">Contribution par phase du cycle de vie et par FDES (kg CO₂ eq.)</div>
+        <div class="card-title">Contribution par phase du cycle de vie et par DEP (kg CO₂ eq.)</div>
         <canvas id="chart-canvas"></canvas>
       </div>
       <div class="dec-card">
-        <div class="card-title">Contribution de chaque FDES à l'Ic_composant</div>
+        <div class="card-title">Contribution de chaque DEP à l'Ic_composant</div>
         <div class="stack-wrap">
           <div class="stack-box"><canvas id="stack-canvas"></canvas></div>
           <div class="stack-legend" id="stack_legend"></div>
@@ -195,14 +202,14 @@ function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 const VALUE_IDS=['dve','A1A3','A4A5','B1','B2','B3','B4','B5','C','D'];
 const fdesList=[];let active=0;
 function newFdes(){const f={name:'',info:null,qty:'1'};VALUE_IDS.forEach(k=>f[k]='');return f;}
-const fdesLabel=(f,i)=>f.name||`FDES ${i+1}`;
+const fdesLabel=(f,i)=>f.name||`DEP ${i+1}`;
 
 function writeForm(){
   const f=fdesList[active];
   $('fdes_name').value=f.name;
   VALUE_IDS.forEach(k=>$(k).value=f[k]);
-  $('epd_id').value=f.info?f.info.id:'';
-  if(f.info)epdMessage(`${f.info.nom}${f.info.declarant?' – '+f.info.declarant:''} (DVR ${f.info.dvr??'?'} ans)`,false,f.info.id);
+  $('epd_id').value=f.info?.id??'';
+  if(f.info)epdMessage(`${f.info.nom}${f.info.declarant?' – '+f.info.declarant:''} (DVR ${f.info.dvr??'?'} ans)${f.info.fichier?' – XML : '+f.info.fichier:''}`,false,f.info.id);
   else epdMessage('');
 }
 function readForm(){
@@ -210,16 +217,39 @@ function readForm(){
   f.name=$('fdes_name').value.trim();
   VALUE_IDS.forEach(k=>f[k]=$(k).value);
 }
-function onFormInput(){readForm();calculate();}
+function onFormInput(){
+  // Saisie manuelle d'une nouvelle DEP alors que la limite est atteinte : on annule la frappe
+  if(creating&&isEmptyFdes(fdesList[active])&&limitReached()){writeForm();limitMessage();return;}
+  readForm();calculate();
+}
 [...VALUE_IDS,'fdes_name'].forEach(id=>$(id).addEventListener('input',onFormInput));
 
-function selectFdes(i){active=i;writeForm();calculate();}
-function addFdes(){fdesList.push(newFdes());selectFdes(fdesList.length-1);$('epd_id').focus();}
+// La zone « DEP sélectionnée » sert par défaut à créer une nouvelle DEP (brouillon vide, absent du tableau) :
+// un chargement INIES ou XML ajoute une DEP puis remet un brouillon vide. Pour modifier une DEP existante,
+// on clique sur sa ligne dans le tableau.
+const isEmptyFdes=f=>!f.info&&!f.name&&VALUE_IDS.every(k=>f[k]==='');
+let creating=true; // true : la zone de saisie crée une DEP ; false : elle modifie une DEP choisie dans le tableau
+function selectFdes(i,isNew=false){active=i;creating=isNew;writeForm();calculate();}
+// Sélectionne le brouillon vide (le crée au besoin) ; renvoie la DEP à remplir
+function startNewFdes(){
+  let i=fdesList.findIndex(isEmptyFdes);
+  if(i<0){fdesList.push(newFdes());i=fdesList.length-1;}
+  selectFdes(i,true);
+  return fdesList[i];
+}
+// Nombre maximal de DEP dans un calcul (au-delà, palette de couleurs et graphiques deviennent illisibles)
+const MAX_FDES=10;
+const limitReached=()=>fdesList.filter(f=>!isEmptyFdes(f)).length>=MAX_FDES;
+const limitMessage=()=>epdMessage(`Limite de ${MAX_FDES} DEP atteinte : supprimez une DEP du tableau pour en ajouter une autre.`,true);
+function addFdes(){
+  if(limitReached()){limitMessage();return;}
+  startNewFdes();$('epd_id').focus();
+}
 function removeFdes(i){
+  const wasActive=i===active;
   fdesList.splice(i,1);
-  if(!fdesList.length)fdesList.push(newFdes());
-  if(active>=fdesList.length||active>i)active=Math.max(0,active-1);
-  selectFdes(active);
+  if(active>i)active--;
+  if(wasActive||!fdesList.length)startNewFdes();else selectFdes(active,creating);
 }
 $('fdes_add').addEventListener('click',addFdes);
 $('fdes_rows').addEventListener('click',e=>{
@@ -268,19 +298,17 @@ async function loadEpd(){
   const m=epdInput.value.trim().match(/(\d+)\s*$/); // accepte aussi l'URL complète de la fiche
   if(!m){epdMessage('Saisissez un EPD_id numérique.',true);return;}
   const id=m[1];epdInput.value=id;
-  const target=fdesList[active]; // la FDES peut changer de sélection pendant le chargement
+  const editTarget=editedFdes(); // capturée avant l'attente : la sélection peut changer pendant le chargement
+  if(!editTarget&&limitReached()){limitMessage();return;}
   epdBtn.disabled=true;epdMessage('Chargement…');
   try{
+    if(!editTarget&&limitReached())throw new Error(`Limite de ${MAX_FDES} DEP atteinte.`); // ajoutée pendant le chargement
     const res=await fetch(`inies.php?id=${id}`);
     const data=await res.json().catch(()=>({error:'Relais inies.php indisponible (la page doit être servie depuis le serveur).'}));
     if(!res.ok||data.error)throw new Error(data.error||`Erreur HTTP ${res.status}`);
-    target.dve=String(data.dvr??'');
-    ['A1A3','A4A5','B1','B2','B3','B4','B5','C'].forEach(k=>target[k]=String(data[k]));
-    target.D=data.D==null?'':String(data.D);
-    target.name=data.nom;
-    target.info={id:data.id,nom:data.nom,declarant:data.declarant,norme:data.norme,dvr:data.dvr,unite:data.unite};
-    if(fdesList[active]===target)writeForm();
-    calculate();
+    applyData(editTarget&&fdesList.includes(editTarget)?editTarget:startNewFdes(),data);
+    finishLoad(editTarget);
+    epdMessage(loadedMessage(data,editTarget),false,data.id);
   }catch(err){
     epdMessage(err.message==='Failed to fetch'?'Relais inies.php injoignable.':err.message,true);
   }finally{
@@ -289,6 +317,88 @@ async function loadEpd(){
 }
 epdBtn.addEventListener('click',loadEpd);
 epdInput.addEventListener('keydown',e=>{if(e.key==='Enter')loadEpd();});
+
+// Remplit une DEP avec les données d'une fiche (INIES ou XML de configurateur)
+// data = {id, nom, declarant, norme, dvr, unite, A1A3, A4A5, B1..B5, C, D} ; id = null pour un XML
+function applyData(target,data){
+  target.dve=String(data.dvr??'');
+  ['A1A3','A4A5','B1','B2','B3','B4','B5','C'].forEach(k=>target[k]=String(data[k]));
+  target.D=data.D==null?'':String(data.D);
+  target.name=data.nom;
+  target.info={id:data.id,nom:data.nom,declarant:data.declarant,norme:data.norme,dvr:data.dvr,unite:data.unite,fichier:data.fichier};
+}
+const loadedMessage=(d,replaced)=>`${d.nom}${d.declarant?' – '+d.declarant:''} (DVR ${d.dvr??'?'} ans)${d.fichier?' – XML : '+d.fichier:''} – ${replaced?'DEP remplacée':'ajoutée au calcul'}`;
+// DEP choisie dans le tableau pour modification (null en mode « nouvelle DEP ») : un chargement la remplace
+const editedFdes=()=>creating?null:fdesList[active];
+// Après un chargement : on reste sur la DEP remplacée, sinon on prépare une nouvelle DEP
+function finishLoad(editTarget){
+  const i=editTarget?fdesList.indexOf(editTarget):-1;
+  if(i>=0)selectFdes(i);else startNewFdes();
+}
+
+// Lecture d'un XML de configurateur (fiche configurée EPDC, FDES ou PEP), entièrement dans le navigateur
+const XML_UNITES={2:'m²',3:'kg',4:'m³',5:'m',7:'kWh',8:'L',13:'unité'}; // UnitId INIES des unités fonctionnelles
+const XML_NORMES={2:'NF EN 15804+A1',4:'PEP PCR ed 3.0',5:'NF EN 15804+A2',6:'PEP PCR ed 4.0'};
+function parseConfigXml(text,fichier){
+  const doc=new DOMParser().parseFromString(text,'application/xml');
+  const root=doc.documentElement;
+  if(doc.querySelector('parsererror')||root.nodeName!=='EPDC')throw new Error(`${fichier} : ce n'est pas un XML de configurateur (balise EPDC absente).`);
+  const tag=name=>{const el=[...root.children].find(c=>c.nodeName===name);return el?el.textContent.trim():'';};
+  // Changement climatique total : IND57 (EN 15804+A2, PEP éd. 4) ou IND19 (EN 15804+A1, PEP éd. 3)
+  const ind=root.querySelector('Indicator[IndicatorCode="IND57"]')||root.querySelector('Indicator[IndicatorCode="IND19"]');
+  if(!ind)throw new Error(`${fichier} : indicateur de changement climatique introuvable.`);
+  const v={};
+  ind.querySelectorAll('Phase').forEach(p=>{const x=parseFloat(p.textContent);if(!isNaN(x))v[p.getAttribute('PhaseCode')]=x;});
+  const g=c=>v[c]??0;
+  const sum=(...cs)=>cs.reduce((s,c)=>s+g(c),0);
+  // Mêmes correspondances que inies.php. PEP : PH1 Production, PH2 Transport, PH3 Mise en oeuvre, PH5 Fin de vie.
+  // FDES : PH11 étape production (PH8-10), PH12 A4, PH13 A5, PH27 étape fin de vie (PH22-25). B1-B5 = PH15-19, D = PH26.
+  const isPep='PH1' in v||'PH5' in v;
+  const qUf=parseFloat(tag('Quantity'));
+  const unit=XML_UNITES[tag('UnitId')];
+  return{
+    id:null,fichier,
+    nom:tag('Name')||fichier,
+    declarant:tag('ConfiguratorName')||null,
+    norme:XML_NORMES[tag('Standard')]||null,
+    dvr:parseInt(tag('TLD'))||null,
+    unite:unit?(isNaN(qUf)||qUf===1?unit:`${qUf} ${unit}`):null,
+    A1A3:isPep?g('PH1'):('PH11' in v?g('PH11'):sum('PH8','PH9','PH10')),
+    A4A5:isPep?sum('PH2','PH3'):('PH12' in v||'PH13' in v?sum('PH12','PH13'):g('PH14')),
+    B1:g('PH15'),B2:g('PH16'),B3:g('PH17'),B4:g('PH18'),B5:g('PH19'),
+    C:isPep?g('PH5'):('PH27' in v?g('PH27'):sum('PH22','PH23','PH24','PH25')),
+    D:v.PH26??null,
+  };
+}
+// Chaque fichier crée une nouvelle DEP ; si une DEP est en modification, le premier fichier la remplace
+async function loadXmlFiles(files){
+  files=[...files].filter(f=>/\.xml$/i.test(f.name));
+  if(!files.length){epdMessage('Déposez un fichier .xml issu d\'un configurateur.',true);return;}
+  const editTarget=editedFdes();
+  const errors=[],loaded=[];let replaced=false;
+  for(const file of files){
+    try{
+      const data=parseConfigXml(await file.text(),file.name);
+      const replace=editTarget&&!replaced&&fdesList.includes(editTarget);
+      if(!replace&&limitReached()){errors.push(`${file.name} : limite de ${MAX_FDES} DEP atteinte, fichier ignoré.`);continue;}
+      applyData(replace?editTarget:startNewFdes(),data);loaded.push(data);
+      if(replace)replaced=true;
+    }catch(err){errors.push(err.message);}
+  }
+  finishLoad(replaced?editTarget:null);
+  if(errors.length)epdMessage(errors.join(' '),true);
+  else if(loaded.length===1)epdMessage(loadedMessage(loaded[0],replaced),false);
+  else epdMessage(`${loaded.length} XML chargés${replaced?' (le premier remplace la DEP sélectionnée)':''}`,false);
+}
+const dropZone=$('xml_drop'),xmlInput=$('xml_file');
+dropZone.addEventListener('click',()=>xmlInput.click());
+dropZone.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();xmlInput.click();}});
+xmlInput.addEventListener('change',()=>{loadXmlFiles(xmlInput.files);xmlInput.value='';});
+['dragenter','dragover'].forEach(t=>dropZone.addEventListener(t,e=>{e.preventDefault();dropZone.classList.add('over');}));
+['dragleave','drop'].forEach(t=>dropZone.addEventListener(t,()=>dropZone.classList.remove('over')));
+dropZone.addEventListener('drop',e=>{e.preventDefault();loadXmlFiles(e.dataTransfer.files);});
+// Un fichier lâché ailleurs dans la page ne doit pas remplacer la calculette
+['dragover','drop'].forEach(t=>window.addEventListener(t,e=>e.preventDefault()));
 
 // Calcul dynamique RE2020 d'une FDES ; null si la DVR n'est pas valide
 function computeFdes(f){
@@ -333,16 +443,17 @@ function renderList(results){
     return;
   }
   $('fdes_rows').innerHTML=fdesList.map((f,i)=>{
+    if(isEmptyFdes(f))return '';
     const r=results[i];
     return `<tr data-i="${i}" class="${i===active?'active':''}">
-      <td>${f.info?f.info.id:'–'}</td>
+      <td>${f.info?(f.info.id??'N/A'):'–'}</td>
       <td><span class="fdes-swatch" style="background:${color(i)}"></span>${esc(fdesLabel(f,i))}</td>
       <td>${esc(f.info?.declarant||'–')}</td>
       <td class="num${r?'':' missing'}">${r?parseInt(f.dve)+' ans':'à saisir'}</td>
       <td class="num"><input type="number" class="qty-input" min="0" step="any" value="${esc(f.qty)}"/><span class="qty-unit">${esc(f.info?.unite||'UF')}</span></td>
       <td class="num" data-c="horsD">${r?fmt(r.totalHorsD):'–'}</td>
       <td class="num" data-c="ic">${r?fmt(r.totalRE2020):'–'}</td>
-      <td class="num"><button type="button" class="fdes-del" title="Supprimer cette FDES">×</button></td>
+      <td class="num"><button type="button" class="fdes-del" title="Supprimer cette DEP">×</button></td>
     </tr>`;
   }).join('');
 }
@@ -350,6 +461,8 @@ function renderList(results){
 function calculate(){
   const results=fdesList.map(computeFdes);
   renderList(results);
+  const fa=fdesList[active];
+  $('edit_mode').textContent=creating||isEmptyFdes(fa)?'– nouvelle DEP':`– modification de « ${fdesLabel(fa,active)} »`;
 
   const valid=results.map((r,i)=>({r,i,f:fdesList[i]})).filter(x=>x.r);
   if(!valid.length){$('results').classList.remove('visible');return;}

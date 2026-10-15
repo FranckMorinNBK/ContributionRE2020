@@ -75,9 +75,9 @@ foreach ($norme['indicateurs'] as $ind) {
         break;
     }
 }
-// Les PEP (phases Fabrication/Distribution/...) n'ont pas le découpage A/B/C/D
-$idPhases = array_column($norme['phases'], 'idPhase');
-if (!$idIndic || !in_array(12, $idPhases)) fail(422, "Norme « {$norme['nomNorme']} » non prise en charge (FDES EN 15804 uniquement).");
+if (!$idIndic) fail(422, "Norme « {$norme['nomNorme']} » non prise en charge (pas d'indicateur de changement climatique).");
+// PEP : phases Production / Transport / Mise en oeuvre / Vie en oeuvre / Fin de vie (idPhase 1 à 5)
+$isPep = in_array(1, array_column($norme['phases'], 'idPhase'));
 
 // idPhaseNorme (propre à la norme) → idPhase (commun) ; puis valeurs par idPhase
 $phaseOf = array_column($norme['phases'], 'idPhase', 'idPhaseNorme');
@@ -108,7 +108,8 @@ function stage($val, $total, $parts) {
 }
 
 // Codes idPhase INIES : 8-10 A1-A3, 11 étape production, 12 A4, 13 A5, 14-18 B1-B5,
-// 21-24 C1-C4, 25 étape fin de vie, 27 D
+// 21-24 C1-C4, 25 étape fin de vie, 27 D.
+// PEP : 1 Production → A1-A3, 2 Transport + 3 Mise en oeuvre → A4-A5, 5 Fin de vie → C ; B1-B5 et D identiques.
 echo json_encode([
     'id'    => (int)$produit['idProduit'],
     'nom'       => $produit['nomProduit'],
@@ -116,13 +117,13 @@ echo json_encode([
     'norme'     => $norme['nomNorme'],
     'dvr'   => $produit['dvt'],
     'unite' => get_unite_uf($produit),
-    'A1A3'  => stage($val, 11, [8, 9, 10]),
-    'A4A5'  => ($val[12] ?? 0) + ($val[13] ?? 0),
+    'A1A3'  => $isPep ? ($val[1] ?? 0) : stage($val, 11, [8, 9, 10]),
+    'A4A5'  => $isPep ? ($val[2] ?? 0) + ($val[3] ?? 0) : ($val[12] ?? 0) + ($val[13] ?? 0),
     'B1'    => $val[14] ?? 0,
     'B2'    => $val[15] ?? 0,
     'B3'    => $val[16] ?? 0,
     'B4'    => $val[17] ?? 0,
     'B5'    => $val[18] ?? 0,
-    'C'     => stage($val, 25, [21, 22, 23, 24]),
+    'C'     => $isPep ? ($val[5] ?? 0) : stage($val, 25, [21, 22, 23, 24]),
     'D'     => $val[27] ?? null,
 ], JSON_UNESCAPED_UNICODE);
