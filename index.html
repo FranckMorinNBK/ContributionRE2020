@@ -43,6 +43,17 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
 .err{font-size:13px;color:#D1562A;display:none;padding:4px 0;}
 
+.inies-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #EDECE7;}
+.inies-row label{font-size:11px;font-weight:700;color:#388F7F;text-transform:uppercase;letter-spacing:0.08em;}
+.inies-row input{padding:5px 6px;font-size:14px;border:1px solid #c8c0b4;border-radius:5px;background:#faf8f5;color:#1C4838;width:90px;}
+.inies-row input:focus{outline:none;border-color:#388F7F;background:#fff;}
+.inies-row button{padding:5px 12px;font-size:13px;border:none;border-radius:5px;background:#388F7F;color:#fff;cursor:pointer;}
+.inies-row button:hover{background:#1C4838;}
+.inies-row button:disabled{background:#B1B8B6;cursor:wait;}
+.inies-status{font-size:13px;color:#636363;}
+.inies-status.error{color:#D1562A;}
+.inies-status a{color:#388F7F;}
+
 /* RESULTS */
 .results{display:none;}
 .results.visible{display:flex;flex-direction:column;gap:10px;}
@@ -59,17 +70,35 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .kpi-val{font-size:22px;font-weight:700;color:#1C4838;line-height:1;}
 .kpi-unit{font-size:11px;color:#B1B8B6;margin-top:2px;}
 
-.bottom-row{display:grid;grid-template-columns:1fr 320px;gap:10px;}
+.bottom-row{display:grid;grid-template-columns:1fr 380px;gap:10px;}
 
 .chart-card{background:#fff;border-radius:8px;border:1px solid #c8c0b4;padding:12px 14px;}
 .card-title{font-size:11px;font-weight:700;color:#388F7F;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
 #chart-canvas{width:100%!important;height:190px!important;}
 
 .dec-card{background:#fff;border-radius:8px;border:1px solid #c8c0b4;padding:12px 14px;}
-.dec-table{width:100%;border-collapse:collapse;font-size:13px;}
-.dec-table th{text-align:left;color:#636363;font-weight:600;font-size:12px;padding:4px 6px;border-bottom:1px solid #EDECE7;}
-.dec-table td{padding:4px 6px;border-bottom:1px solid #f0ece6;color:#1C4838;}
-.dec-table tr:last-child td{border-bottom:none;font-weight:700;background:#f5f2ee;}
+
+/* LISTE DES FDES */
+.fdes-table{width:100%;border-collapse:collapse;font-size:13px;}
+.fdes-table th{text-align:left;color:#636363;font-weight:600;font-size:11px;padding:3px 6px;border-bottom:1px solid #EDECE7;}
+.fdes-table td{padding:4px 6px;border-bottom:1px solid #f0ece6;color:#1C4838;cursor:pointer;}
+.fdes-table tr.active td{background:#e6f3ef;font-weight:600;}
+.fdes-table tr:not(.active):hover td{background:#f5f2ee;}
+.fdes-table td.num{text-align:right;white-space:nowrap;}
+.fdes-table td.missing{color:#D1562A;}
+.fdes-swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle;}
+.fdes-del{border:none;background:none;color:#B1B8B6;font-size:16px;cursor:pointer;line-height:1;padding:0 4px;}
+.fdes-del:hover{color:#D1562A;}
+.fdes-add{align-self:flex-start;padding:5px 12px;font-size:13px;border:1px dashed #388F7F;border-radius:5px;background:#fff;color:#388F7F;cursor:pointer;}
+.fdes-add:hover{background:#e6f3ef;}
+.field input.name-input{width:260px;}
+
+.stack-wrap{display:flex;gap:12px;align-items:stretch;}
+.stack-box{position:relative;width:120px;height:190px;flex:none;}
+.stack-legend{flex:1;font-size:12px;color:#1C4838;display:flex;flex-direction:column;gap:4px;overflow-y:auto;max-height:190px;}
+.stack-legend div{display:flex;align-items:center;gap:6px;}
+.stack-legend .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stack-legend .val{white-space:nowrap;color:#636363;}
 
 .info-strip{font-size:13px;color:#636363;background:#fff;border-radius:6px;padding:6px 12px;border:1px solid #c8c0b4;display:flex;gap:20px;}
 .info-strip b{color:#1C4838;}
@@ -81,15 +110,31 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
   <a href="https://www.nobatek.com/" target="_blank" rel="noopener"><img src="NOBATEK_logo_officiel_web_PNG.png" style="height:48px;width:auto;" alt="Nobatek logo"/></a>
   <div>
     <div class="header-title">Calculateur Ic_composant RE2020</div>
-    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une FDES</div>
+    <div class="header-subtitle">Calculez la contribution RE2020 dynamique d'un produit de construction à l'échelle du bâtiment à partir d'une ou plusieurs FDES</div>
   </div>
 </div>
 
 <div class="main">
 
   <div class="input-zone">
-    <p class="zone-instruction">Saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
+    <div class="group-label">FDES du calcul</div>
+    <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Cliquez sur une ligne du tableau pour modifier la FDES correspondante.</p>
+    <table class="fdes-table">
+      <thead><tr><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
+      <tbody id="fdes_rows"></tbody>
+    </table>
+    <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
+
+    <div class="group-label" style="margin-top:6px;">FDES sélectionnée</div>
+    <div class="inies-row">
+      <label for="epd_id">EPD_id INIES</label>
+      <input type="text" id="epd_id" inputmode="numeric" placeholder="ex. 46443"/>
+      <button type="button" id="epd_load">Charger la fiche</button>
+      <span class="inies-status" id="epd_status"></span>
+    </div>
+    <p class="zone-instruction">Saisissez l'EPD_id d'une FDES INIES pour remplir automatiquement les champs, ou saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
     <p class="zone-instruction">Vous pouvez aussi coller directement dans le champ « A1-A3 » toute la ligne des impacts copiée depuis la fiche INIES.</p>
+    <div class="field"><label>Nom de la FDES</label><input type="text" id="fdes_name" class="name-input" placeholder="ex. Isolant laine de bois"/></div>
     <div class="row-inputs">
 
       <!-- DVE -->
@@ -141,7 +186,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
     </div>
 
-    <span class="err" id="err">DVR doit être compris entre 1 et 100 ans.</span>
+    <span class="err" id="err">DVR doit être compris entre 1 et 100 ans (FDES non prise en compte dans le total).</span>
   </div>
 
   <!-- RESULTS -->
@@ -171,8 +216,11 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
         <canvas id="chart-canvas"></canvas>
       </div>
       <div class="dec-card">
-        <div class="card-title">Décomposition dynamique</div>
-        <table class="dec-table" id="r_detail"></table>
+        <div class="card-title">Contribution de chaque FDES à l'Ic_composant</div>
+        <div class="stack-wrap">
+          <div class="stack-box"><canvas id="stack-canvas"></canvas></div>
+          <div class="stack-legend" id="stack_legend"></div>
+        </div>
       </div>
     </div>
 
@@ -184,13 +232,49 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const COEF_DYN=[1,0.992,0.984,0.976,0.969,0.961,0.953,0.945,0.937,0.929,0.921,0.913,0.905,0.897,0.889,0.88,0.872,0.864,0.856,0.848,0.84,0.831,0.823,0.815,0.806,0.798,0.79,0.781,0.773,0.764,0.756,0.747,0.739,0.73,0.721,0.713,0.704,0.695,0.686,0.678,0.669,0.66,0.651,0.642,0.633,0.624,0.615,0.606,0.597,0.587,0.578];
-const PER=50;let chartInst=null;
+const PER=50;let chartInst=null,stackInst=null;
+const FDES_COLORS=['#1C4838','#D1562A','#388F7F','#E8A33D','#7DC4B8','#8C6BB1','#5AA89A','#B1B8B6','#A33B1A','#2E6B8F'];
+const color=i=>FDES_COLORS[i%FDES_COLORS.length];
+const $=id=>document.getElementById(id);
+function fmt(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-const allInputIds=['dve','A1A3','A4A5','B1','B2','B3','B4','B5','C','D'];
-allInputIds.forEach(id=>document.getElementById(id).addEventListener('input',calculate));
-document.getElementById('dve').addEventListener('input',function(){
-  const d=parseInt(this.value)||0;
-  document.getElementById('alpha-preview').textContent=d>0?Math.trunc(PER/d):'–';
+// Liste des FDES du calcul. Les valeurs sont gardées telles que saisies (chaînes) pour pouvoir les réafficher.
+// info = données de la fiche INIES chargée : {id, nom, declarant, norme, dvr}, ou null pour une saisie manuelle.
+const VALUE_IDS=['dve','A1A3','A4A5','B1','B2','B3','B4','B5','C','D'];
+const fdesList=[];let active=0;
+function newFdes(){const f={name:'',info:null};VALUE_IDS.forEach(k=>f[k]='');return f;}
+const fdesLabel=(f,i)=>f.name||`FDES ${i+1}`;
+
+function writeForm(){
+  const f=fdesList[active];
+  $('fdes_name').value=f.name;
+  VALUE_IDS.forEach(k=>$(k).value=f[k]);
+  $('epd_id').value=f.info?f.info.id:'';
+  if(f.info)epdMessage(`${f.info.nom}${f.info.declarant?' – '+f.info.declarant:''} (DVR ${f.info.dvr??'?'} ans)`,false,f.info.id);
+  else epdMessage('');
+}
+function readForm(){
+  const f=fdesList[active];
+  f.name=$('fdes_name').value.trim();
+  VALUE_IDS.forEach(k=>f[k]=$(k).value);
+}
+function onFormInput(){readForm();calculate();}
+[...VALUE_IDS,'fdes_name'].forEach(id=>$(id).addEventListener('input',onFormInput));
+
+function selectFdes(i){active=i;writeForm();calculate();}
+function addFdes(){fdesList.push(newFdes());selectFdes(fdesList.length-1);$('epd_id').focus();}
+function removeFdes(i){
+  fdesList.splice(i,1);
+  if(!fdesList.length)fdesList.push(newFdes());
+  if(active>=fdesList.length||active>i)active=Math.max(0,active-1);
+  selectFdes(active);
+}
+$('fdes_add').addEventListener('click',addFdes);
+$('fdes_rows').addEventListener('click',e=>{
+  const tr=e.target.closest('tr');if(!tr)return;
+  const i=+tr.dataset.i;
+  if(e.target.closest('.fdes-del'))removeFdes(i);else if(i!==active)selectFdes(i);
 });
 
 // Collage groupé depuis la fiche INIES : colonnes du tableau "Résultats de l'ICV"
@@ -200,7 +284,7 @@ const INIES_PASTE_MAP=[
   {id:'A1A3'},{id:'A4A5'},{id:'B1'},{id:'B2'},{id:'B3'},{id:'B4'},{id:'B5'},
   {id:null},{id:null},{id:null},{id:'C'},{id:null},{id:'D'}
 ];
-document.getElementById('A1A3').addEventListener('paste',function(e){
+$('A1A3').addEventListener('paste',function(e){
   const text=(e.clipboardData||window.clipboardData).getData('text');
   const tokens=text.split(/\t|\r?\n/).map(t=>t.trim()).filter(t=>t.length);
   const values=tokens.map(t=>parseFloat(t.replace(',','.'))).filter(n=>!isNaN(n));
@@ -208,26 +292,58 @@ document.getElementById('A1A3').addEventListener('paste',function(e){
   e.preventDefault();
   values.forEach((val,i)=>{
     const target=INIES_PASTE_MAP[i].id;
-    if(target)document.getElementById(target).value=val;
+    if(target)$(target).value=val;
   });
-  calculate();
+  onFormInput();
 });
 
-function v(id){const x=parseFloat(document.getElementById(id).value);return isNaN(x)?0:x;}
-function fmt(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+// Chargement d'une fiche INIES par EPD_id, via le relais inies.php (l'API INIES bloque les appels directs du navigateur)
+const epdInput=$('epd_id'),epdBtn=$('epd_load'),epdStatus=$('epd_status');
+function epdMessage(text,isError,id){
+  epdStatus.className='inies-status'+(isError?' error':'');
+  epdStatus.textContent=text;
+  if(id){
+    const a=document.createElement('a');
+    a.href=`https://www.base-inies.fr/infos-produit/${id}`;a.target='_blank';a.rel='noopener';a.textContent='voir la fiche';
+    epdStatus.append(' – ',a);
+  }
+}
+async function loadEpd(){
+  const m=epdInput.value.trim().match(/(\d+)\s*$/); // accepte aussi l'URL complète de la fiche
+  if(!m){epdMessage('Saisissez un EPD_id numérique.',true);return;}
+  const id=m[1];epdInput.value=id;
+  const target=fdesList[active]; // la FDES peut changer de sélection pendant le chargement
+  epdBtn.disabled=true;epdMessage('Chargement…');
+  try{
+    const res=await fetch(`inies.php?id=${id}`);
+    const data=await res.json().catch(()=>({error:'Relais inies.php indisponible (la page doit être servie depuis le serveur).'}));
+    if(!res.ok||data.error)throw new Error(data.error||`Erreur HTTP ${res.status}`);
+    target.dve=String(data.dvr??'');
+    ['A1A3','A4A5','B1','B2','B3','B4','B5','C'].forEach(k=>target[k]=String(data[k]));
+    target.D=data.D==null?'':String(data.D);
+    target.name=data.nom;
+    target.info={id:data.id,nom:data.nom,declarant:data.declarant,norme:data.norme,dvr:data.dvr};
+    if(fdesList[active]===target)writeForm();
+    calculate();
+  }catch(err){
+    epdMessage(err.message==='Failed to fetch'?'Relais inies.php injoignable.':err.message,true);
+  }finally{
+    epdBtn.disabled=false;
+  }
+}
+epdBtn.addEventListener('click',loadEpd);
+epdInput.addEventListener('keydown',e=>{if(e.key==='Enter')loadEpd();});
 
-function calculate(){
-  const DVE=parseInt(document.getElementById('dve').value);
-  const errEl=document.getElementById('err');
-  if(!DVE||DVE<=0||DVE>100){errEl.style.display='inline';document.getElementById('results').classList.remove('visible');return;}
-  errEl.style.display='none';
-
+// Calcul dynamique RE2020 d'une FDES ; null si la DVR n'est pas valide
+function computeFdes(f){
+  const DVE=parseInt(f.dve);
+  if(!DVE||DVE<=0||DVE>100)return null;
+  const v=k=>{const x=parseFloat(f[k]);return isNaN(x)?0:x;};
   const A1A3=v('A1A3'),A4A5=v('A4A5');
-  const B1=v('B1'),B2=v('B2'),B3=v('B3'),B4=v('B4'),B5=v('B5');
+  const B_total=v('B1')+v('B2')+v('B3')+v('B4')+v('B5');
   const C=v('C');
-  const D_raw=parseFloat(document.getElementById('D').value);
+  const D_raw=parseFloat(f.D);
   const hasD=!isNaN(D_raw);const D=hasD?D_raw:0;
-  const B_total=B1+B2+B3+B4+B5;
   const alpha=Math.trunc(PER/DVE),Futil=PER/DVE-alpha;
   const Production=A1A3+A4A5;
   let beta1=0;
@@ -240,53 +356,93 @@ function calculate(){
     beta2=(A1A3+A4A5+C)*(Fco2+Futil*cA);
     if(hasD)moduleD+=D*(Fco2+Futil*cA);
   }
-  const totalRE2020=Production+beta1+beta2+FinDeVie+moduleD;
   const totalHorsD=A1A3+A4A5+B_total+C;
-  const totalAvecD=totalHorsD+(hasD?D:0);
+  return{A1A3,A4A5,beta1,beta2,FinDeVie,moduleD,hasD,alpha,Futil,
+    totalRE2020:Production+beta1+beta2+FinDeVie+moduleD,totalHorsD,totalAvecD:totalHorsD+(hasD?D:0)};
+}
 
-  document.getElementById('r_re2020').textContent=fmt(totalRE2020);
-  document.getElementById('r_horsD').textContent=fmt(totalHorsD);
-  document.getElementById('r_avecD').textContent=fmt(totalAvecD);
-  document.getElementById('r_info').innerHTML=
-    `<span>α = <b>${alpha}</b> renouvellement(s)</span><span>Futil = <b>${Futil.toFixed(3)}</b></span><span>c_dyn[50] = <b>${COEF_DYN[PER]}</b></span>`;
+function renderList(results){
+  $('fdes_rows').innerHTML=fdesList.map((f,i)=>{
+    const r=results[i];
+    return `<tr data-i="${i}" class="${i===active?'active':''}">
+      <td><span class="fdes-swatch" style="background:${color(i)}"></span>${esc(fdesLabel(f,i))}</td>
+      <td>${esc(f.info?.declarant||'–')}</td>
+      <td class="num${r?'':' missing'}">${r?parseInt(f.dve)+' ans':'à saisir'}</td>
+      <td class="num">${r?fmt(r.totalRE2020):'–'}</td>
+      <td class="num"><button type="button" class="fdes-del" title="Supprimer cette FDES">×</button></td>
+    </tr>`;
+  }).join('');
+}
 
+function calculate(){
+  const results=fdesList.map(computeFdes);
+  renderList(results);
+  $('err').style.display=results[active]?'none':'inline';
+
+  const valid=results.map((r,i)=>({r,i,f:fdesList[i]})).filter(x=>x.r);
+  if(!valid.length){$('results').classList.remove('visible');return;}
+
+  const sum=k=>valid.reduce((s,x)=>s+x.r[k],0);
+  const hasD=valid.some(x=>x.r.hasD);
+  $('r_re2020').textContent=fmt(sum('totalRE2020'));
+  $('r_horsD').textContent=fmt(sum('totalHorsD'));
+  $('r_avecD').textContent=fmt(sum('totalAvecD'));
+
+  const ra=results[active];
+  $('r_info').innerHTML=ra
+    ?`<span>${esc(fdesLabel(fdesList[active],active))}</span><span>α = <b>${ra.alpha}</b> renouvellement(s)</span><span>Futil = <b>${ra.Futil.toFixed(3)}</b></span><span>c_dyn[50] = <b>${COEF_DYN[PER]}</b></span>`
+    :`<span>c_dyn[50] = <b>${COEF_DYN[PER]}</b></span>`;
+
+  // Contribution par phase, toutes FDES confondues
   const allData=[
-    {label:'A1-A3',val:A1A3,color:'#1C4838'},
-    {label:'A4-A5',val:A4A5,color:'#388F7F'},
-    {label:'B1-B5 (β1)',val:beta1,color:'#5AA89A'},
-    {label:'β2 renouv.',val:beta2,color:'#7DC4B8'},
-    {label:'C fin de vie',val:FinDeVie,color:'#D1562A'},
-    ...(hasD?[{label:'D bénéfices',val:moduleD,color:'#B1B8B6'}]:[]),
+    {label:'A1-A3',val:sum('A1A3'),color:'#1C4838'},
+    {label:'A4-A5',val:sum('A4A5'),color:'#388F7F'},
+    {label:'B1-B5 (β1)',val:sum('beta1'),color:'#5AA89A'},
+    {label:'β2 renouv.',val:sum('beta2'),color:'#7DC4B8'},
+    {label:'C fin de vie',val:sum('FinDeVie'),color:'#D1562A'},
+    ...(hasD?[{label:'D bénéfices',val:sum('moduleD'),color:'#B1B8B6'}]:[]),
   ];
+  const tooltip={backgroundColor:'#1C4838',titleColor:'#EDECE7',bodyColor:'#fff',padding:8,cornerRadius:5};
+  const ticks={font:{family:"'Segoe UI',sans-serif",size:11},color:'#636363'};
   if(chartInst)chartInst.destroy();
-  chartInst=new Chart(document.getElementById('chart-canvas').getContext('2d'),{
+  chartInst=new Chart($('chart-canvas').getContext('2d'),{
     type:'bar',
     data:{labels:allData.map(d=>d.label),datasets:[{data:allData.map(d=>d.val),backgroundColor:allData.map(d=>d.color),borderRadius:4,borderSkipped:false,borderWidth:0}]},
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.parsed.y)} kg CO₂ eq.`},backgroundColor:'#1C4838',titleColor:'#EDECE7',bodyColor:'#fff',padding:8,cornerRadius:5}},
+      plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{label:c=>`${fmt(c.parsed.y)} kg CO₂ eq.`}}},
       scales:{
-        x:{grid:{display:false},ticks:{font:{family:"'Segoe UI',sans-serif",size:11},color:'#636363'}},
-        y:{grid:{color:'#ece7e0'},border:{dash:[3,3],display:false},ticks:{font:{family:"'Segoe UI',sans-serif",size:11},color:'#636363',callback:n=>fmt(n)}}
+        x:{grid:{display:false},ticks},
+        y:{grid:{color:'#ece7e0'},border:{dash:[3,3],display:false},ticks:{...ticks,callback:n=>fmt(n)}}
       }
     }
   });
 
-  document.getElementById('r_detail').innerHTML=`
-    <thead><tr><th>Composante</th><th style="text-align:right">kg CO₂ eq.</th></tr></thead>
-    <tbody>
-      <tr><td>Production A1-A5</td><td style="text-align:right">${fmt(Production)}</td></tr>
-      <tr><td>β1 Exploitation B1-B5</td><td style="text-align:right">${fmt(beta1)}</td></tr>
-      <tr><td>β2 Renouvellements</td><td style="text-align:right">${fmt(beta2)}</td></tr>
-      <tr><td>Fin de vie C</td><td style="text-align:right">${fmt(FinDeVie)}</td></tr>
-      <tr><td>Module D${hasD?'':' (absent)'}</td><td style="text-align:right">${hasD?fmt(moduleD):'–'}</td></tr>
-      <tr><td><b>Ic_composant RE2020</b></td><td style="text-align:right"><b>${fmt(totalRE2020)}</b></td></tr>
-    </tbody>`;
+  // Barre cumulée : une couche par FDES
+  const total=sum('totalRE2020');
+  if(stackInst)stackInst.destroy();
+  stackInst=new Chart($('stack-canvas').getContext('2d'),{
+    type:'bar',
+    data:{labels:['Ic_composant'],datasets:valid.map(x=>({label:fdesLabel(x.f,x.i),data:[x.r.totalRE2020],backgroundColor:color(x.i),borderWidth:1,borderColor:'#fff'}))},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{label:c=>`${c.dataset.label} : ${fmt(c.parsed.y)} kg CO₂ eq.`}}},
+      scales:{
+        x:{stacked:true,display:false},
+        y:{stacked:true,grid:{color:'#ece7e0'},border:{display:false},ticks:{...ticks,callback:n=>n.toLocaleString('fr-FR',{maximumFractionDigits:0})}}
+      }
+    }
+  });
+  $('stack_legend').innerHTML=valid.slice().reverse().map(x=>{
+    const pct=total?x.r.totalRE2020/total*100:0;
+    return `<div title="${esc(fdesLabel(x.f,x.i))}"><span class="fdes-swatch" style="background:${color(x.i)}"></span><span class="lbl">${esc(fdesLabel(x.f,x.i))}</span><span class="val">${fmt(x.r.totalRE2020)} · ${pct.toFixed(0)} %</span></div>`;
+  }).join('');
 
-  document.getElementById('results').classList.add('visible');
+  $('results').classList.add('visible');
 }
 
-
+fdesList.push(newFdes());
+selectFdes(0);
 </script>
 </body>
 </html>

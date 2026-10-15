@@ -9,9 +9,9 @@ PORT     = 22
 USER     = "sdarbxbx-outils"
 PASSWORD = os.getenv("FTP_PASSWORD")
 
-LOCAL_FILE  = os.path.join(os.path.dirname(__file__), "index.html")
+LOCAL_DIR   = os.path.dirname(__file__)
+FILES       = ["index.html", "inies.php"]
 REMOTE_DIR  = "contributionRE2020"
-REMOTE_FILE = f"{REMOTE_DIR}/index.html"
 
 def upload():
     transport = paramiko.Transport((HOST, PORT))
@@ -25,8 +25,11 @@ def upload():
         sftp.mkdir(REMOTE_DIR)
         print(f"Dossier '{REMOTE_DIR}' créé.")
 
-    sftp.put(LOCAL_FILE, REMOTE_FILE)
-    print(f"'{LOCAL_FILE}' → '{REMOTE_FILE}' : envoi OK")
+    for name in FILES:
+        local_file  = os.path.join(LOCAL_DIR, name)
+        remote_file = f"{REMOTE_DIR}/{name}"
+        sftp.put(local_file, remote_file)
+        print(f"'{local_file}' → '{remote_file}' : envoi OK")
 
     sftp.close()
     transport.close()
