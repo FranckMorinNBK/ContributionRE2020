@@ -84,10 +84,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .fdes-del:hover{color:#D1562A;}
 .fdes-add{align-self:flex-start;padding:5px 12px;font-size:13px;border:1px dashed #388F7F;border-radius:5px;background:#fff;color:#388F7F;cursor:pointer;}
 .fdes-add:hover{background:#e6f3ef;}
-.fdes-editor{display:flex;flex-direction:column;gap:10px;padding-top:10px;border-top:1px solid #EDECE7;}
-.fdes-editor[hidden]{display:none;}
-.fdes-done{align-self:flex-end;padding:5px 12px;font-size:13px;border:none;border-radius:5px;background:#1C4838;color:#fff;cursor:pointer;}
-.fdes-done:hover{background:#388F7F;}
 
 .stack-wrap{display:flex;gap:12px;align-items:stretch;}
 .stack-box{position:relative;width:120px;height:190px;flex:none;}
@@ -119,7 +115,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
     </table>
     <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
 
-    <div class="fdes-editor" id="fdes_editor">
     <div class="group-label" style="margin-top:6px;">FDES sélectionnée</div>
     <div class="inies-row">
       <label for="epd_id">EPD_id INIES</label>
@@ -141,8 +136,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
       <div class="field"><label title="B5 Réhabilitation">B5</label><input type="number" id="B5" placeholder="0" step="any" title="B5 Réhabilitation"/></div>
       <div class="field"><label title="Fin de vie (C1-C4)">C1-C4</label><input type="number" id="C" placeholder="0" step="any" title="Fin de vie (C1-C4)"/></div>
       <div class="field"><label title="Module D – bénéfices et charges hors système (facultatif)">D</label><input type="number" id="D" placeholder="0" step="any" title="Module D – bénéfices et charges hors système (facultatif)"/></div>
-    </div>
-    <button type="button" class="fdes-done" id="fdes_done">Valider la FDES</button>
     </div>
 
   </div>
@@ -219,29 +212,19 @@ function readForm(){
 function onFormInput(){readForm();calculate();}
 [...VALUE_IDS,'fdes_name'].forEach(id=>$(id).addEventListener('input',onFormInput));
 
-// La zone de saisie est masquée dès qu'une FDES est complète, pour laisser la place aux résultats ;
-// elle réapparaît via « + Ajouter une FDES », un clic sur une ligne du tableau, ou s'il ne reste aucune FDES calculable.
-function setEditor(open){$('fdes_editor').hidden=!open;}
-function closeEditorIfDone(){
-  if(computeFdes(fdesList[active]))setEditor(false);
-  else epdMessage('Renseignez au moins une DVR comprise entre 1 et 100 ans.',true);
-}
 function selectFdes(i){active=i;writeForm();calculate();}
-function addFdes(){fdesList.push(newFdes());selectFdes(fdesList.length-1);setEditor(true);$('epd_id').focus();}
+function addFdes(){fdesList.push(newFdes());selectFdes(fdesList.length-1);$('epd_id').focus();}
 function removeFdes(i){
   fdesList.splice(i,1);
   if(!fdesList.length)fdesList.push(newFdes());
   if(active>=fdesList.length||active>i)active=Math.max(0,active-1);
   selectFdes(active);
-  if(!fdesList.some(computeFdes))setEditor(true);
 }
 $('fdes_add').addEventListener('click',addFdes);
-$('fdes_done').addEventListener('click',closeEditorIfDone);
 $('fdes_rows').addEventListener('click',e=>{
   const tr=e.target.closest('tr');if(!tr||e.target.closest('.qty-input'))return;
   const i=+tr.dataset.i;
-  if(e.target.closest('.fdes-del'))removeFdes(i);
-  else{if(i!==active)selectFdes(i);setEditor(true);}
+  if(e.target.closest('.fdes-del'))removeFdes(i);else if(i!==active)selectFdes(i);
 });
 $('fdes_rows').addEventListener('input',e=>{
   if(!e.target.classList.contains('qty-input'))return;
@@ -295,7 +278,7 @@ async function loadEpd(){
     target.D=data.D==null?'':String(data.D);
     target.name=data.nom;
     target.info={id:data.id,nom:data.nom,declarant:data.declarant,norme:data.norme,dvr:data.dvr,unite:data.unite};
-    if(fdesList[active]===target){writeForm();setEditor(false);}
+    if(fdesList[active]===target)writeForm();
     calculate();
   }catch(err){
     epdMessage(err.message==='Failed to fetch'?'Relais inies.php injoignable.':err.message,true);
