@@ -19,27 +19,18 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .input-zone{background:#fff;border-radius:8px;border:1px solid #c8c0b4;padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
 .zone-instruction{margin:0;color:#555;font-size:13px;}
 
-.row-inputs{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;}
+.row-inputs{display:grid;grid-template-columns:minmax(150px,3fr) repeat(10,minmax(58px,1fr));gap:6px;align-items:end;overflow-x:auto;}
 
-.group{display:flex;flex-direction:column;gap:6px;}
 .group-label{font-size:11px;font-weight:700;color:#388F7F;text-transform:uppercase;letter-spacing:0.08em;}
-.fields-row{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;}
 
 .field{display:flex;flex-direction:column;gap:3px;}
 .field label{font-size:11px;color:#636363;font-weight:500;white-space:nowrap;}
-.field input{padding:5px 6px;font-size:14px;border:1px solid #c8c0b4;border-radius:5px;background:#faf8f5;color:#1C4838;width:72px;}
+.field{min-width:0;}
+.field input{padding:5px 6px;font-size:14px;border:1px solid #c8c0b4;border-radius:5px;background:#faf8f5;color:#1C4838;width:100%;}
 .field input:focus{outline:none;border-color:#388F7F;background:#fff;}
 .field input::placeholder{color:#c8c0b4;font-size:13px;}
-.field.wide input{width:80px;}
-.field.narrow input{width:58px;}
 
-.dve-block{display:flex;flex-direction:column;gap:4px;min-width:90px;}
-.dve-block .group-label{color:#D1562A;}
-.dve-inner{display:flex;align-items:center;gap:6px;}
-.dve-inner input{width:58px;padding:5px 6px;font-size:16px;font-weight:700;border:1px solid #c8c0b4;border-radius:5px;background:#f5f2ee;color:#1C4838;text-align:center;}
-.dve-inner input:focus{outline:none;border-color:#388F7F;}
-.alpha-info{font-size:12px;color:#636363;white-space:nowrap;}
-.alpha-info b{color:#D1562A;}
+.field-dvr label{color:#D1562A;font-weight:700;}
 
 .err{font-size:13px;color:#D1562A;display:none;padding:4px 0;}
 
@@ -91,7 +82,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .fdes-del:hover{color:#D1562A;}
 .fdes-add{align-self:flex-start;padding:5px 12px;font-size:13px;border:1px dashed #388F7F;border-radius:5px;background:#fff;color:#388F7F;cursor:pointer;}
 .fdes-add:hover{background:#e6f3ef;}
-.field input.name-input{width:260px;}
 
 .stack-wrap{display:flex;gap:12px;align-items:stretch;}
 .stack-box{position:relative;width:120px;height:190px;flex:none;}
@@ -100,8 +90,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 .stack-legend .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .stack-legend .val{white-space:nowrap;color:#636363;}
 
-.info-strip{font-size:13px;color:#636363;background:#fff;border-radius:6px;padding:6px 12px;border:1px solid #c8c0b4;display:flex;gap:20px;}
-.info-strip b{color:#1C4838;}
 </style>
 </head>
 <body>
@@ -120,7 +108,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
     <div class="group-label">FDES du calcul</div>
     <p class="zone-instruction">Ajoutez autant de FDES que nécessaire : l'Ic_composant total est la somme de leurs contributions. Cliquez sur une ligne du tableau pour modifier la FDES correspondante.</p>
     <table class="fdes-table">
-      <thead><tr><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
+      <thead><tr><th>EPD_id</th><th>Produit</th><th>Déclarant</th><th style="text-align:right">DVR</th><th style="text-align:right">Total CdV hors D (kg CO₂ eq.)</th><th style="text-align:right">Ic_composant (kg CO₂ eq.)</th><th></th></tr></thead>
       <tbody id="fdes_rows"></tbody>
     </table>
     <button type="button" class="fdes-add" id="fdes_add">+ Ajouter une FDES</button>
@@ -134,56 +122,18 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
     </div>
     <p class="zone-instruction">Saisissez l'EPD_id d'une FDES INIES pour remplir automatiquement les champs, ou saisissez la durée de vie du produit ainsi que l'impact sur le changement climatique total des différentes phases du cycle de vie (en kgCO₂eq.)</p>
     <p class="zone-instruction">Vous pouvez aussi coller directement dans le champ « A1-A3 » toute la ligne des impacts copiée depuis la fiche INIES.</p>
-    <div class="field"><label>Nom de la FDES</label><input type="text" id="fdes_name" class="name-input" placeholder="ex. Isolant laine de bois"/></div>
     <div class="row-inputs">
-
-      <!-- DVE -->
-      <div class="dve-block" style="margin-top:12px;">
-        <div class="group-label">DVR</div>
-        <div class="field"><label>PER = 50 ans</label><input type="number" id="dve" placeholder="0" min="1" max="100" step="1"/></div>
-        <!-- <div class="dve-inner">
-          <input type="number" id="dve" value="50" min="1" max="100" step="1"/>
-          <span style="font-size:10px;color:#636363;">ans</span>
-        </div> -->
-      </div>
-
-      <!-- A -->
-      <div class="group">
-        <div class="group-label">Production &amp; Construction</div>
-        <div class="fields-row">
-          <div class="field"><label>A1-A3 Fabrication</label><input type="number" id="A1A3" placeholder="0" step="any"/></div>
-          <div class="field"><label>A4-A5 Transport &amp; Mise en œuvre</label><input type="number" id="A4A5" placeholder="0" step="any"/></div>
-        </div>
-      </div>
-
-      <!-- B -->
-      <div class="group">
-        <div class="group-label">Utilisation B1–B5 <span style="font-size:8px;color:#B1B8B6;text-transform:none;font-weight:400;">(hors B6/B7)</span></div>
-        <div class="fields-row">
-          <div class="field"><label>B1 Utilisation</label><input type="number" id="B1" placeholder="0" step="any"/></div>
-          <div class="field"><label>B2 Maintenance</label><input type="number" id="B2" placeholder="0" step="any"/></div>
-          <div class="field"><label>B3 Réparation</label><input type="number" id="B3" placeholder="0" step="any"/></div>
-          <div class="field"><label>B4 Remplacement</label><input type="number" id="B4" placeholder="0" step="any"/></div>
-          <div class="field"><label>B5 Réhabilitation</label><input type="number" id="B5" placeholder="0" step="any"/></div>
-        </div>
-      </div>
-
-      <!-- C -->
-      <div class="group">
-        <div class="group-label">Fin de vie C</div>
-        <div class="fields-row">
-          <div class="field"><label>C Fin de vie (C1-C4)</label><input type="number" id="C" placeholder="0" step="any"/></div>
-        </div>
-      </div>
-
-      <!-- D -->
-      <div class="group">
-        <div class="group-label">Module D</div>
-        <div class="fields-row">
-          <div class="field wide"><label>D Bénéfices hors système</label><input type="number" id="D" placeholder="0" step="any"/></div>
-        </div>
-      </div>
-
+      <div class="field"><label>Nom de la FDES</label><input type="text" id="fdes_name" placeholder="ex. Isolant laine de bois"/></div>
+      <div class="field field-dvr"><label title="Durée de vie de référence (PER = 50 ans)">DVR (ans)</label><input type="number" id="dve" placeholder="0" min="1" max="100" step="1" title="Durée de vie de référence (PER = 50 ans)"/></div>
+      <div class="field"><label title="Production (A1-A3)">A1-A3</label><input type="number" id="A1A3" placeholder="0" step="any" title="Production (A1-A3)"/></div>
+      <div class="field"><label title="Transport et mise en œuvre (A4-A5)">A4-A5</label><input type="number" id="A4A5" placeholder="0" step="any" title="Transport et mise en œuvre (A4-A5)"/></div>
+      <div class="field"><label title="B1 Utilisation">B1</label><input type="number" id="B1" placeholder="0" step="any" title="B1 Utilisation"/></div>
+      <div class="field"><label title="B2 Maintenance">B2</label><input type="number" id="B2" placeholder="0" step="any" title="B2 Maintenance"/></div>
+      <div class="field"><label title="B3 Réparation">B3</label><input type="number" id="B3" placeholder="0" step="any" title="B3 Réparation"/></div>
+      <div class="field"><label title="B4 Remplacement">B4</label><input type="number" id="B4" placeholder="0" step="any" title="B4 Remplacement"/></div>
+      <div class="field"><label title="B5 Réhabilitation">B5</label><input type="number" id="B5" placeholder="0" step="any" title="B5 Réhabilitation"/></div>
+      <div class="field"><label title="Fin de vie (C1-C4)">C1-C4</label><input type="number" id="C" placeholder="0" step="any" title="Fin de vie (C1-C4)"/></div>
+      <div class="field"><label title="Module D – bénéfices et charges hors système (facultatif)">D</label><input type="number" id="D" placeholder="0" step="any" title="Module D – bénéfices et charges hors système (facultatif)"/></div>
     </div>
 
     <span class="err" id="err">DVR doit être compris entre 1 et 100 ans (FDES non prise en compte dans le total).</span>
@@ -212,7 +162,7 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
 
     <div class="bottom-row">
       <div class="chart-card">
-        <div class="card-title">Contribution par phase du cycle de vie (kg CO₂ eq.)</div>
+        <div class="card-title">Contribution par phase du cycle de vie et par FDES (kg CO₂ eq.)</div>
         <canvas id="chart-canvas"></canvas>
       </div>
       <div class="dec-card">
@@ -223,8 +173,6 @@ body{font-family:'Segoe UI',sans-serif;background:#EDECE7;min-height:100vh;font-
         </div>
       </div>
     </div>
-
-    <div class="info-strip" id="r_info"></div>
 
   </div>
 </div>
@@ -357,7 +305,7 @@ function computeFdes(f){
     if(hasD)moduleD+=D*(Fco2+Futil*cA);
   }
   const totalHorsD=A1A3+A4A5+B_total+C;
-  return{A1A3,A4A5,beta1,beta2,FinDeVie,moduleD,hasD,alpha,Futil,
+  return{A1A3,A4A5,beta1,beta2,FinDeVie,moduleD,hasD,
     totalRE2020:Production+beta1+beta2+FinDeVie+moduleD,totalHorsD,totalAvecD:totalHorsD+(hasD?D:0)};
 }
 
@@ -365,9 +313,11 @@ function renderList(results){
   $('fdes_rows').innerHTML=fdesList.map((f,i)=>{
     const r=results[i];
     return `<tr data-i="${i}" class="${i===active?'active':''}">
+      <td>${f.info?f.info.id:'–'}</td>
       <td><span class="fdes-swatch" style="background:${color(i)}"></span>${esc(fdesLabel(f,i))}</td>
       <td>${esc(f.info?.declarant||'–')}</td>
       <td class="num${r?'':' missing'}">${r?parseInt(f.dve)+' ans':'à saisir'}</td>
+      <td class="num">${r?fmt(r.totalHorsD):'–'}</td>
       <td class="num">${r?fmt(r.totalRE2020):'–'}</td>
       <td class="num"><button type="button" class="fdes-del" title="Supprimer cette FDES">×</button></td>
     </tr>`;
@@ -388,32 +338,31 @@ function calculate(){
   $('r_horsD').textContent=fmt(sum('totalHorsD'));
   $('r_avecD').textContent=fmt(sum('totalAvecD'));
 
-  const ra=results[active];
-  $('r_info').innerHTML=ra
-    ?`<span>${esc(fdesLabel(fdesList[active],active))}</span><span>α = <b>${ra.alpha}</b> renouvellement(s)</span><span>Futil = <b>${ra.Futil.toFixed(3)}</b></span><span>c_dyn[50] = <b>${COEF_DYN[PER]}</b></span>`
-    :`<span>c_dyn[50] = <b>${COEF_DYN[PER]}</b></span>`;
 
-  // Contribution par phase, toutes FDES confondues
-  const allData=[
-    {label:'A1-A3',val:sum('A1A3'),color:'#1C4838'},
-    {label:'A4-A5',val:sum('A4A5'),color:'#388F7F'},
-    {label:'B1-B5 (β1)',val:sum('beta1'),color:'#5AA89A'},
-    {label:'β2 renouv.',val:sum('beta2'),color:'#7DC4B8'},
-    {label:'C fin de vie',val:sum('FinDeVie'),color:'#D1562A'},
-    ...(hasD?[{label:'D bénéfices',val:sum('moduleD'),color:'#B1B8B6'}]:[]),
+  // Contribution par phase, empilée par FDES
+  const phases=[
+    {label:'A1-A3',key:'A1A3'},
+    {label:'A4-A5',key:'A4A5'},
+    {label:'B1-B5 (β1)',key:'beta1'},
+    {label:'β2 renouv.',key:'beta2'},
+    {label:'C fin de vie',key:'FinDeVie'},
+    ...(hasD?[{label:'D bénéfices',key:'moduleD'}]:[]),
   ];
   const tooltip={backgroundColor:'#1C4838',titleColor:'#EDECE7',bodyColor:'#fff',padding:8,cornerRadius:5};
   const ticks={font:{family:"'Segoe UI',sans-serif",size:11},color:'#636363'};
   if(chartInst)chartInst.destroy();
   chartInst=new Chart($('chart-canvas').getContext('2d'),{
     type:'bar',
-    data:{labels:allData.map(d=>d.label),datasets:[{data:allData.map(d=>d.val),backgroundColor:allData.map(d=>d.color),borderRadius:4,borderSkipped:false,borderWidth:0}]},
+    data:{labels:phases.map(p=>p.label),datasets:valid.map(x=>({label:fdesLabel(x.f,x.i),data:phases.map(p=>x.r[p.key]),backgroundColor:color(x.i),borderWidth:1,borderColor:'#fff'}))},
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{label:c=>`${fmt(c.parsed.y)} kg CO₂ eq.`}}},
+      interaction:{mode:'index'},
+      plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{
+        label:c=>`${c.dataset.label} : ${fmt(c.parsed.y)} kg CO₂ eq.`,
+        footer:items=>`Total : ${fmt(items.reduce((s,c)=>s+c.parsed.y,0))} kg CO₂ eq.`}}},
       scales:{
-        x:{grid:{display:false},ticks},
-        y:{grid:{color:'#ece7e0'},border:{dash:[3,3],display:false},ticks:{...ticks,callback:n=>fmt(n)}}
+        x:{stacked:true,grid:{display:false},ticks},
+        y:{stacked:true,grid:{color:'#ece7e0'},border:{dash:[3,3],display:false},ticks:{...ticks,callback:n=>fmt(n)}}
       }
     }
   });
